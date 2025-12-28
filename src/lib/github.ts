@@ -37,3 +37,39 @@ export async function fetchGitHubIssue(url: string) {
         repo
     };
 }
+
+export async function fetchPRDiff(url: string) {
+    const diffUrl = url.endsWith('.diff') ? url : `${url}.diff`;
+
+    const response = await fetch(diffUrl);
+    if (!response.ok) {
+        throw new Error("Failed to fetch PR diff");
+    }
+
+    return await response.text();
+}
+
+export async function fetchPRDetails(url: string) {
+    const regex = /github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)/;
+    const match = url.match(regex);
+
+    if (!match) {
+        throw new Error("Invalid GitHub PR URL");
+    }
+
+    const [, owner, repo, prNumber] = match;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`;
+
+    const headers: HeadersInit = {
+        "Accept": "application/vnd.github.v3+json",
+    };
+
+    if (process.env.GITHUB_TOKEN) {
+        headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(apiUrl, { headers });
+    if (!response.ok) throw new Error("Failed to fetch PR details");
+
+    return await response.json();
+}
