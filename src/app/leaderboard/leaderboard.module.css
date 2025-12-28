@@ -1,0 +1,99 @@
+.main {
+    min-height: 100vh;
+    padding-top: 100px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 19px;
+    color: var(--text-secondary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.table td {
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.row {
+    transition: background 0.15s;
+}
+
+.row:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.topRow {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.rank {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eee;
+}
+
+.username {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.points {
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-feature-settings: "tnum";
+}
+
+.crown {
+    font-size: 14px;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-tertiary);
+}

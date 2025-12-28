@@ -1,5 +1,6 @@
 import styles from './submissions.module.css';
 import { prisma } from '@/lib/db';
+import SubmissionActions from '@/components/SubmissionActions';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,10 +52,9 @@ export default async function ReviewSubmissions() {
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-                                <button className="button-primary" style={{ fontSize: '13px', padding: '8px 16px', backgroundColor: 'green' }}>Approve</button>
-                                <button className="button-primary" style={{ fontSize: '13px', padding: '8px 16px', backgroundColor: 'red' }}>Reject</button>
-                            </div>
+                            {sub.status !== 'APPROVED' && sub.status !== 'REJECTED' && (
+                                <SubmissionActions id={sub.id} />
+                            )}
                         </div>
                     ))
                 )}
