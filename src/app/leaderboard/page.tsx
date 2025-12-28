@@ -38,8 +38,8 @@ export default async function LeaderboardPage() {
                                     <tr key={user.id} className={index < 3 ? styles.topRow : styles.row}>
                                         <td className={styles.rank}>{index + 1}</td>
                                         <td className={styles.userCell}>
-                                            {user.avatar && <img src={user.avatar} className={styles.avatar} alt="" />}
-                                            <span className={styles.username}>{user.username}</span>
+                                            {user.image && <img src={user.image} className={styles.avatar} alt="" />}
+                                            <span className={styles.username}>{user.name || 'Anonymous'}</span>
                                             {index === 0 && <span className={styles.crown}>👑</span>}
                                         </td>
                                         <td style={{ textAlign: 'right', opacity: 0.6 }}>
