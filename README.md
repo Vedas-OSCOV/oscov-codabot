@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Oscov Codabot
 
-## Getting Started
+Oscov Codabot is a coding marathon management platform designed for Vedas-OSCOV. It enables administrators to manage open-source issues and challenges, while participants can submit solutions (Pull Requests) to earn points and climb the leaderboard. The system features an AI-assisted verification workflow using Google Gemini to analyze code quality before manual moderation.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Public Landing Page**: Minimalist design showcasing marathon stats.
+- **Issue Browser**: Participants can view and filter active coding challenges fetched from GitHub.
+- **Submission System**: Users submit PR links, which are automatically analyzed by AI.
+- **Admin Dashboard**: A comprehensive control center to manage issues and review submissions.
+- **AI-Powered Verification**: Google Gemini analyzes PR diffs for quality, bugs, and requirements.
+- **Leaderboard**: Real-time ranking of top contributors based on accrued points.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Styling**: Vanilla CSS (CSS Modules)
+- **Authentication**: NextAuth.js (GitHub OAuth)
+- **AI**: Google Generative AI SDK (Gemini)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup Instructions
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+
+- PostgreSQL Database
+- GitHub OAuth App credentials
+- Google Gemini API Key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd oscov-codabot
+   ```
 
-## Deploy on Vercel
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Configure Environment Variables:
+   Copy the example file and fill in your credentials.
+   ```bash
+   cp .env.example .env
+   ```
+   **Required Variables**:
+   - `DATABASE_URL`: Connection string for your PostgreSQL database.
+   - `GITHUB_ID` & `GITHUB_SECRET`: From your GitHub OAuth App.
+   - `GEMINI_API_KEY`: For AI analysis features.
+   - `NEXTAUTH_SECRET`: A random string for session security.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Initialize the Database:
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. Start the Development Server:
+   ```bash
+   npm run dev
+   ```
+
+   The application will be available at `http://localhost:3000`.
+
+## Architecture
+
+See `docs/architecture.md` for a detailed breakdown of the system design and component interaction.
+
+## Authors
+
+See `docs/authors.md`.
