@@ -42,6 +42,10 @@ export const authOptions: NextAuthOptions = {
     session: {
         strategy: 'jwt' // Switching to JWT to support CredentialsProvider easily
     },
+    pages: {
+        signIn: '/auth/signin',
+        error: '/auth/error', // Error code passed in query string as ?error=
+    },
     callbacks: {
         async jwt({ token, user, trigger, session }) {
             if (user) {
