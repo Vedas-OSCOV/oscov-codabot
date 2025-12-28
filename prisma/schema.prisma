@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum IssueStatus {
+  OPEN
+  CLOSED
+}
+
+enum SubmissionStatus {
+  PENDING_AI
+  PENDING_MODERATOR
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id          String       @id @default(cuid())
+  githubId    String       @unique
+  username    String
+  avatar      String?
+  role        Role         @default(USER)
+  score       Int          @default(0)
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Issue {
+  id          String       @id @default(cuid())
+  repoUrl     String
+  issueNumber Int
+  title       String
+  description String
+  basePoints  Int
+  status      IssueStatus  @default(OPEN)
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([repoUrl, issueNumber])
+}
+
+model Submission {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  issueId       String
+  issue         Issue            @relation(fields: [issueId], references: [id])
+  prUrl         String
+  aiFeedback    String?
+  aiScore       Int?
+  status        SubmissionStatus @default(PENDING_AI)
+  isMerged      Boolean          @default(false)
+  awardedPoints Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
