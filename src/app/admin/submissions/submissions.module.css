@@ -1,0 +1,55 @@
+.container {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.title {
+    font-size: 28px;
+    margin-bottom: 24px;
+}
+
+.filterBar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.filter {
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.activeFilter {
+    composes: filter;
+    background: var(--foreground);
+    color: white;
+}
+
+.emptyState {
+    padding: 60px;
+    text-align: center;
+    color: var(--text-tertiary);
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--glass-shadow);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
