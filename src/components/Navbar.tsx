@@ -2,6 +2,7 @@ import Link from 'next/link';
 import styles from './Navbar.module.css';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import SignOutButton from './SignOutButton';
 
 export default async function Navbar() {
     const session = await getServerSession(authOptions);
@@ -36,6 +37,7 @@ export default async function Navbar() {
                                     Admin
                                 </Link>
                             )}
+                            <SignOutButton />
                         </div>
                     ) : (
                         <Link href="/api/auth/signin" className={styles.login}>
