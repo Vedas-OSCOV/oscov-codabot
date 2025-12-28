@@ -21,16 +21,23 @@ export async function submitSolution(issueId: string, formData: FormData) {
     }
 
     try {
-        // 1. Fetch PR details to verify it exists
+        const existingSubmission = await prisma.submission.findFirst({
+            where: {
+                userId: session.user.id,
+                issueId: issueId
+            }
+        });
+
+        if (existingSubmission) {
+            return { error: "You have already submitted a solution for this issue. Each user can only submit once per issue." };
+        }
+
         const prDetails = await fetchPRDetails(prUrl);
 
-        // 2. Fetch the diff
         const diff = await fetchPRDiff(prUrl);
 
-        // 3. Run AI Analysis
         const aiResult = await analyzePRDiff(diff, prDetails.title, prDetails.body);
 
-        // 4. Create Submission Record
         await prisma.submission.create({
             data: {
                 userId: session.user.id,
@@ -38,8 +45,8 @@ export async function submitSolution(issueId: string, formData: FormData) {
                 prUrl: prUrl,
                 aiFeedback: aiResult.feedback || aiResult.summary,
                 aiScore: aiResult.qualityScore || 0,
-                status: "PENDING_MODERATOR", // Auto-escalate to moderator after AI check
-                isMerged: prDetails.merged, // Check if already merged
+                status: "PENDING_MODERATOR", // auto-escalate to moderator after AI check
+                isMerged: prDetails.merged, // check if already merged
             }
         });
 

@@ -107,4 +107,6 @@ model Submission {
   awardedPoints Int              @default(0)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+
+  @@unique([userId, issueId])
 }
