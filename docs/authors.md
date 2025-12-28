@@ -1,3 +1,3 @@
 # Project Contributors
 
-- **Comethrusev (Basab Jha)** - Lead Developer & Architect
+- **[Comethrusws](https://github.com/comethrusws) (Basab Jha)** - Lead Developer & System Architect
