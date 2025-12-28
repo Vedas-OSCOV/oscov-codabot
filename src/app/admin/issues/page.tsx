@@ -1,9 +1,19 @@
 'use client';
 import styles from './issues.module.css';
-import { useState } from 'react';
+import { createIssue } from '@/app/actions/issues';
+import { useActionState } from 'react';
+
+const initialState = {
+    message: '',
+    error: ''
+}
 
 export default function ManageIssues() {
-    const [url, setUrl] = useState('');
+    const [state, formAction, isPending] = useActionState(async (prev: any, formData: FormData) => {
+        const result = await createIssue(formData);
+        if (result.error) return { error: result.error, message: '' };
+        return { message: 'Issue added successfully!', error: '' };
+    }, initialState);
 
     return (
         <div className={styles.container}>
@@ -13,25 +23,35 @@ export default function ManageIssues() {
                 <h3 className={styles.sectionTitle}>Add New Issue</h3>
                 <p className={styles.helpText}>Paste the full GitHub URL of the issue/PR you want to add to the marathon.</p>
 
-                <form className={styles.form}>
+                <form action={formAction} className={styles.form}>
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>GitHub Issue URL</label>
                         <input
+                            name="url"
                             type="text"
                             className={styles.input}
                             placeholder="https://github.com/..."
-                            value={url}
-                            onChange={(e) => setUrl(e.target.value)}
+                            required
                         />
                     </div>
 
                     <div className={styles.inputGroup}>
                         <label className={styles.label}>Points Reward</label>
-                        <input type="number" className={styles.input} placeholder="e.g. 50" style={{ width: '120px' }} />
+                        <input
+                            name="points"
+                            type="number"
+                            className={styles.input}
+                            placeholder="e.g. 50"
+                            style={{ width: '120px' }}
+                            required
+                        />
                     </div>
 
-                    <button type="button" className="button-primary" style={{ marginTop: '16px' }}>
-                        Fetch & Add
+                    {state.error && <p style={{ color: 'red', fontSize: '14px' }}>{state.error}</p>}
+                    {state.message && <p style={{ color: 'green', fontSize: '14px' }}>{state.message}</p>}
+
+                    <button type="submit" disabled={isPending} className="button-primary" style={{ marginTop: '16px', opacity: isPending ? 0.7 : 1 }}>
+                        {isPending ? 'Fetching...' : 'Fetch & Add'}
                     </button>
                 </form>
             </div>

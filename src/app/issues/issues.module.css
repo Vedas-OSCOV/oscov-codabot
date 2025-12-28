@@ -1,0 +1,129 @@
+.main {
+    min-height: 100vh;
+    padding-top: 100px;
+    background: var(--background);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 19px;
+    color: var(--text-secondary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.repoName {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+.points {
+    background: rgba(0, 113, 227, 0.1);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+.cardTitle {
+    font-size: 18px;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.link {
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.link:hover {
+    color: var(--accent);
+}
+
+.desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 24px;
+    flex-grow: 1;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+}
+
+.submitBtn {
+    flex: 1;
+    background: var(--foreground);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.submitBtn:hover {
+    opacity: 0.9;
+}
+
+.viewBtn {
+    padding: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.viewBtn:hover {
+    color: var(--text-primary);
+}
+
+.empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 18px;
+    color: var(--text-tertiary);
+    padding: 60px;
+}

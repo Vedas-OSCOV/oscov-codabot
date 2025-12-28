@@ -32,7 +32,6 @@ export async function createIssue(formData: FormData) {
 
     } catch (error: any) {
         console.error("Failed to create issue:", error);
-        // Prisma unique constraint error code P2002
         if (error.code === 'P2002') {
             return { error: "This issue has already been added." };
         }
