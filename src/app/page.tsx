@@ -27,8 +27,8 @@ export default function Home() {
       <section className={styles.stats}>
         <div className="glass-panel" style={{ padding: '40px', width: '1000px', display: 'flex', justifyContent: 'space-around' }}>
           <div className={styles.statItem}>
-            <h3>$10k+</h3>
-            <p>Prizes Pool</p>
+            <h3>Guaranteed</h3>
+            <p>Prizes!</p>
           </div>
           <div className={styles.statItem}>
             <h3>50+</h3>
