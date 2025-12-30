@@ -3,9 +3,33 @@ import Navbar from '@/components/Navbar';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+
 export const dynamic = 'force-dynamic';
 
 export default async function IssuesPage() {
+    const session = await getServerSession(authOptions);
+    // If not logged in, maybe allow viewing? But requirements say "cant have them solve issues".
+    // Better to check semester if logged in.
+
+    let isFirstSemester = false;
+    if (session?.user?.id) {
+        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+        if (user?.semester === 1) {
+            return (
+                <main className={styles.main}>
+                    <Navbar />
+                    <div style={{ textAlign: 'center', paddingTop: '100px' }}>
+                        <h1>Restricted Access</h1>
+                        <p>Semester 1 students must complete the Challenge Mode first.</p>
+                        <Link href="/challenges" style={{ color: '#0071e3' }}>Go to Challenges</Link>
+                    </div>
+                </main>
+            );
+        }
+    }
+
     const issues = await prisma.issue.findMany({
         where: { status: 'OPEN' },
         orderBy: { createdAt: 'desc' },

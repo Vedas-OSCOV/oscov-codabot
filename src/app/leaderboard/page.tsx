@@ -1,11 +1,19 @@
 import Navbar from '@/components/Navbar';
 import styles from './leaderboard.module.css';
 import { prisma } from '@/lib/db';
+import LeaderboardTabs from '@/components/LeaderboardTabs';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LeaderboardPage() {
-    const users = await prisma.user.findMany({
+    const regularUsers = await prisma.user.findMany({
+        where: { OR: [{ semester: { not: 1 } }, { semester: null }] }, // Semester 2-8 or unknown
+        orderBy: { score: 'desc' },
+        take: 50
+    });
+
+    const semester1Users = await prisma.user.findMany({
+        where: { semester: 1 },
         orderBy: { score: 'desc' },
         take: 50
     });
@@ -17,42 +25,14 @@ export default async function LeaderboardPage() {
             <div className={styles.container}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>Leaderboard</h1>
-                    <p className={styles.subtitle}>The top contributors of the marathon.</p>
+                    <p className={styles.subtitle}>Top contributors across all tracks.</p>
                 </div>
 
-                <div className={styles.list}>
-                    {users.length === 0 ? (
-                        <div className={styles.emptyState}>No rankings yet. Start coding!</div>
-                    ) : (
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '60px' }}>#</th>
-                                    <th>User</th>
-                                    <th style={{ textAlign: 'right' }}>Issues Solved</th>
-                                    <th style={{ textAlign: 'right' }}>Total Points</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user, index) => (
-                                    <tr key={user.id} className={index < 3 ? styles.topRow : styles.row}>
-                                        <td className={styles.rank}>{index + 1}</td>
-                                        <td className={styles.userCell}>
-                                            {user.image && <img src={user.image} className={styles.avatar} alt="" />}
-                                            <span className={styles.username}>{user.name || 'Anonymous'}</span>
-                                            {index === 0 && <span className={styles.crown}>👑</span>}
-                                        </td>
-                                        <td style={{ textAlign: 'right', opacity: 0.6 }}>
-                                            {/* We would need to count approved submissions here or store it in user model */}
-                                            -
-                                        </td>
-                                        <td className={styles.points}>{user.score}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                <LeaderboardTabs
+                    regularUsers={regularUsers}
+                    semester1Users={semester1Users}
+                    styles={styles}
+                />
             </div>
         </main>
     );
