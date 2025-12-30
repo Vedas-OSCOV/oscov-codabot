@@ -55,7 +55,7 @@ export default async function ChallengesPage() {
                 <div style={{ marginBottom: '40px' }}>
                     <Link href="/dashboard" style={{ color: '#666', fontSize: '14px', marginBottom: '16px', display: 'inline-block' }}>← Back to Dashboard</Link>
                     <h1 style={{ fontSize: '40px', fontWeight: '700', marginBottom: '16px', backgroundImage: 'linear-gradient(135deg, #1d1d1f 0%, #434344 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        Beginner Challenges
+                        Challenges
                     </h1>
                     <p style={{ fontSize: '18px', color: '#86868b', maxWidth: '600px' }}>
                         Welcome to the gauntlet. These problems are designed to test your theoretical understanding and implementation skills to the limit.

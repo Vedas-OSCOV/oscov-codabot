@@ -39,35 +39,74 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
         );
     }
 
-    // ... (rest of the component)
-
     return (
-        <button
-            type="submit"
-            disabled={pending}
-            style={{
-                background: pending ? '#9ca3af' : '#0071e3',
-                color: 'white',
-                padding: '12px 32px',
-                borderRadius: '99px',
-                border: 'none',
-                fontWeight: '600',
-                cursor: pending ? 'not-allowed' : 'pointer',
-                opacity: pending ? 0.9 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                minWidth: '180px',
-                justifyContent: 'center'
-            }}
-        >
-            {pending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
-            {pending ? 'Grading Solution...' : 'Submit Solution'}
-            <style jsx>{`
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
-        </button>
+        <form action={handleSubmit}>
+            {previousSubmission && previousSubmission.status === 'REJECTED' && (
+                <div style={{ padding: '16px', background: '#fee2e2', borderRadius: '12px', border: '1px solid #fecaca', marginBottom: '16px' }}>
+                    <strong style={{ color: '#991b1b' }}>Previous Attempt Rejected</strong>
+                    <p style={{ margin: '8px 0 0 0', color: '#7f1d1d', fontSize: '14px' }}>{previousSubmission.aiFeedback}</p>
+                </div>
+            )}
+
+            {result && result.status === 'REJECTED' && !previousSubmission && (
+                <div style={{ padding: '16px', background: '#fee2e2', borderRadius: '12px', border: '1px solid #fecaca', marginBottom: '16px' }}>
+                    <strong style={{ color: '#991b1b' }}>Submission Rejected</strong>
+                    <p style={{ margin: '8px 0 0 0', color: '#7f1d1d', fontSize: '14px' }}>{result.feedback}</p>
+                </div>
+            )}
+
+            {result?.message && !result.success && !result.status && (
+                <div style={{ color: 'red', marginBottom: '16px' }}>{result.message}</div>
+            )}
+
+            <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Your Solution</label>
+                <textarea
+                    name="content"
+                    rows={12}
+                    className="glass-panel"
+                    style={{
+                        width: '100%',
+                        padding: '16px',
+                        fontFamily: 'monospace',
+                        fontSize: '14px',
+                        minHeight: '200px',
+                        background: 'rgba(255,255,255,0.5)',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px'
+                    }}
+                    placeholder="// Write your solution here... (Code or Pseudocode)"
+                    required
+                />
+            </div>
+
+            <button
+                type="submit"
+                disabled={pending}
+                style={{
+                    background: pending ? '#9ca3af' : '#0071e3',
+                    color: 'white',
+                    padding: '12px 32px',
+                    borderRadius: '99px',
+                    border: 'none',
+                    fontWeight: '600',
+                    cursor: pending ? 'not-allowed' : 'pointer',
+                    opacity: pending ? 0.9 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    minWidth: '180px',
+                    justifyContent: 'center'
+                }}
+            >
+                {pending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
+                {pending ? 'Grading Solution...' : 'Submit Solution'}
+                <style jsx>{`
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `}</style>
+            </button>
+        </form>
     );
 }
