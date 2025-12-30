@@ -1,5 +1,0 @@
-# Nixpacks configuration (Force Node 23 for Prisma 7 support)
-providers = ["node"]
-
-[node]
-version = "23"
