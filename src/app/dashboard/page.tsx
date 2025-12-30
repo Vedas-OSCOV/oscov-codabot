@@ -39,76 +39,81 @@ export default async function DashboardPage() {
     const isFirstSemester = user.semester === 1;
 
     return (
-        <main style={{ minHeight: '100vh', paddingTop: '100px', background: '#FAFAFA' }}>
+        <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
 
-                <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-                    {user.image && <img src={user.image} style={{ width: 80, height: 80, borderRadius: '50%' }} />}
+                <div className="retro-window" style={{ marginBottom: '40px', padding: '32px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+                    {user.image && <img src={user.image} style={{ width: 80, height: 80, border: '4px solid #fff', imageRendering: 'pixelated' }} />}
                     <div>
-                        <h1 style={{ fontSize: '32px', fontWeight: '700', margin: 0 }}>{user.name}</h1>
-                        <p style={{ color: '#666', marginTop: '8px' }}>
-                            {isFirstSemester ? 'Fresher (Semester 1)' : `Semester ${user.semester} Student`}
+                        <h1 style={{ fontSize: '24px', margin: 0, color: '#fff', textShadow: '2px 2px #DC2626', fontFamily: '"Press Start 2P"' }}>{user.name}</h1>
+                        <p style={{ color: '#0f0', marginTop: '12px', fontFamily: '"Share Tech Mono"', fontSize: '14px' }}>
+                            {isFirstSemester ? '[FRESHER_TRACK]' : `[SEMESTER_${user.semester}]`}
                         </p>
                     </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
-                    <div className="glass-panel" style={{ padding: '24px' }}>
-                        <h3 style={{ fontSize: '14px', color: '#666', textTransform: 'uppercase', marginBottom: '8px' }}>Total Score</h3>
-                        <div style={{ fontSize: '48px', fontWeight: '700' }}>{user.score}</div>
+                    <div className="retro-window" style={{ padding: '24px', textAlign: 'center' }}>
+                        <h3 style={{ fontSize: '12px', color: '#888', marginBottom: '16px', fontFamily: '"Press Start 2P"' }}>SCORE</h3>
+                        <div style={{ fontSize: '48px', color: '#fff', textShadow: '3px 3px #DC2626', fontFamily: '"Press Start 2P"' }}>{user.score}</div>
                     </div>
-                    <div className="glass-panel" style={{ padding: '24px' }}>
-                        <h3 style={{ fontSize: '14px', color: '#666', textTransform: 'uppercase', marginBottom: '8px' }}>
-                            {isFirstSemester ? 'Challenges Solved' : 'Submissions'}
+                    <div className="retro-window" style={{ padding: '24px', textAlign: 'center' }}>
+                        <h3 style={{ fontSize: '12px', color: '#888', marginBottom: '16px', fontFamily: '"Press Start 2P"' }}>
+                            {isFirstSemester ? 'SOLVED' : 'TOTAL'}
                         </h3>
-                        <div style={{ fontSize: '48px', fontWeight: '700' }}>{user.submissions.length}</div>
+                        <div style={{ fontSize: '48px', color: '#fff', textShadow: '3px 3px #DC2626', fontFamily: '"Press Start 2P"' }}>{user.submissions.length}</div>
                     </div>
                 </div>
 
                 {isFirstSemester ? (
-                    <div style={{ marginBottom: '40px', padding: '32px', background: 'linear-gradient(135deg, #0071e3 0%, #00c6fb 100%)', borderRadius: '24px', color: 'white', textAlign: 'center' }}>
-                        <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>Beginner Challenges</h2>
-                        <p style={{ fontSize: '16px', opacity: 0.9, marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px' }}>
-                            Prove your worth. Solve extremely hard theoretical and DSA problems to earn your place.
+                    <div className="retro-window" style={{ marginBottom: '40px', padding: '32px', textAlign: 'center', background: '#000' }}>
+                        <h2 style={{ fontSize: '20px', marginBottom: '16px', color: '#0f0', fontFamily: '"Press Start 2P"' }}>FRESHER_GAUNTLET</h2>
+                        <p style={{ fontSize: '14px', color: '#ccc', marginBottom: '24px', maxWidth: '500px', margin: '0 auto 24px', fontFamily: '"Share Tech Mono"' }}>
+                            Prove your worth. Solve DSA challenges to earn your rank.
                         </p>
-                        <a href="/challenges" className="glass-panel" style={{
+                        <a href="/challenges" style={{
                             display: 'inline-block',
                             padding: '12px 32px',
-                            color: '#0071e3',
-                            background: 'white',
+                            color: '#000',
+                            background: '#0f0',
                             fontWeight: '600',
-                            borderRadius: '99px',
-                            textDecoration: 'none'
+                            textDecoration: 'none',
+                            fontFamily: '"Press Start 2P"',
+                            fontSize: '12px',
+                            border: '2px solid #0f0',
+                            boxShadow: '4px 4px 0 #fff'
                         }}>
-                            Start Challenges
+                            START_NOW
                         </a>
                     </div>
                 ) : (
                     <>
-                        <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '24px' }}>My Submissions</h2>
+                        <h2 style={{ fontSize: '20px', marginBottom: '24px', color: '#fff', textShadow: '2px 2px #DC2626', fontFamily: '"Press Start 2P"' }}>SUBMISSION_LOG</h2>
 
                         {user.submissions.length === 0 ? (
-                            <div style={{ padding: '40px', textAlign: 'center', color: '#888', background: 'white', borderRadius: '16px' }}>
-                                You haven't submitted any solutions yet. <a href="/issues" style={{ color: '#0071e3' }}>Start Coding!</a>
+                            <div className="retro-window" style={{ padding: '40px', textAlign: 'center' }}>
+                                <p style={{ color: '#888', fontFamily: '"Share Tech Mono"' }}>
+                                    NO_RECORDS_FOUND. <a href="/issues" style={{ color: '#0f0' }}>INITIALIZE_CODING</a>
+                                </p>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {user.submissions.map(sub => (
-                                    <div key={sub.id} className="glass-panel" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div key={sub.id} className="retro-window" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div>
-                                            <div style={{ fontWeight: '600', marginBottom: '4px' }}>{sub.issue?.title || sub.challenge?.title || 'Unknown Submission'}</div>
-                                            <div style={{ fontSize: '13px', color: '#666' }}>Submitted on {new Date(sub.createdAt).toLocaleDateString()}</div>
+                                            <div style={{ color: '#fff', marginBottom: '8px', fontFamily: '"Share Tech Mono"' }}>{sub.issue?.title || sub.challenge?.title || 'Unknown Submission'}</div>
+                                            <div style={{ fontSize: '12px', color: '#666', fontFamily: '"Share Tech Mono"' }}>DATE: {new Date(sub.createdAt).toLocaleDateString()}</div>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
                                             <div style={{
-                                                display: 'inline-block', padding: '4px 12px', borderRadius: '99px', fontSize: '12px', fontWeight: '600',
-                                                background: sub.status === 'APPROVED' ? '#dcfce7' : sub.status === 'REJECTED' ? '#fee2e2' : '#f3f4f6',
-                                                color: sub.status === 'APPROVED' ? '#166534' : sub.status === 'REJECTED' ? '#991b1b' : '#374151'
+                                                display: 'inline-block', padding: '4px 12px', fontSize: '10px', fontFamily: '"Press Start 2P"',
+                                                background: sub.status === 'APPROVED' ? '#0f0' : sub.status === 'REJECTED' ? '#DC2626' : '#888',
+                                                color: '#000'
                                             }}>
                                                 {sub.status}
                                             </div>
-                                            {sub.awardedPoints > 0 && <div style={{ fontSize: '13px', color: '#166534', marginTop: '4px' }}>+{sub.awardedPoints} pts</div>}
+                                            {sub.awardedPoints > 0 && <div style={{ fontSize: '12px', color: '#0f0', marginTop: '8px', fontFamily: '"Share Tech Mono"' }}>+{sub.awardedPoints} PTS</div>}
                                         </div>
                                     </div>
                                 ))}
