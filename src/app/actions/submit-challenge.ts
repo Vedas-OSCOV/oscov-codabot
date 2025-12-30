@@ -3,9 +3,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 export async function submitChallenge(challengeId: string, content: string) {
     if (!content || content.length < 10) {
@@ -17,16 +16,11 @@ export async function submitChallenge(challengeId: string, content: string) {
         throw new Error("Unauthorized");
     }
 
-    // Reuse existing functionality? The user wants "validate with gemini too... extremely strict".
-    // I need the API key. It should be in process.env.GEMINI_API_KEY.
-
-    if (!process.env.GEMINI_API_KEY) {
-        throw new Error("Gemini API Key missing");
+    if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OpenAI API Key missing");
     }
 
-    const start = Date.now();
-
-    // Check if already solved?
+    // Check if already solved
     const existing = await prisma.submission.findFirst({
         where: { userId: session.user.id, challengeId }
     });
@@ -43,8 +37,7 @@ export async function submitChallenge(challengeId: string, content: string) {
         throw new Error("Challenge not found");
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const prompt = `
     You are a strictly academic and extremely harsh Computer Science professor.
@@ -76,11 +69,21 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     let aiResult;
     try {
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text().replace(/```json|```/g, '').trim();
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: "You are a strict code reviewer. Return JSON only." },
+                { role: "user", content: prompt }
+            ],
+            response_format: { type: "json_object" }
+        });
+
+        const responseText = completion.choices[0].message.content;
+        if (!responseText) throw new Error("No response from AI");
+
         aiResult = JSON.parse(responseText);
     } catch (e) {
-        console.error("Gemini Error:", e);
+        console.error("OpenAI Error:", e);
         return { success: false, message: "Validation failed. Please try again." };
     }
 

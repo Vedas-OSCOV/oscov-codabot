@@ -60,7 +60,7 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
             )}
 
             <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Your Solution (Code or Explanation)</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Your Solution (on)</label>
                 <textarea
                     name="content"
                     rows={12}
@@ -73,7 +73,7 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                         minHeight: '200px',
                         background: 'rgba(255,255,255,0.5)'
                     }}
-                    placeholder="// Write your code or explanation here..."
+                    placeholder="// Write your solution here..."
                     required
                 />
             </div>
