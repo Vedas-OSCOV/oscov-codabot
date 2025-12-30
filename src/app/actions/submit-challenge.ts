@@ -44,11 +44,11 @@ export async function submitChallenge(challengeId: string, content: string) {
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Fast and good enough? User said "extremely strict", maybe pro is better if available, but flash is standard.
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
     You are a strictly academic and extremely harsh Computer Science professor.
-    A student has submitted a solution to the following extremely hard problem:
+    A student has submitted a solution to the following problem:
     
     Problem: ${challenge.title}
     Description: ${challenge.description}
@@ -59,17 +59,18 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     Your task:
     1. Verify if the submission is correct, technically sound, and addresses all constraints.
-    2. BE EXTREMELY STRICT. If the code is pseudocode, it must be logically perfect. If it's code, it must be close to compilable and optimal.
-    3. If there are any logical flaws, security risks (like in memory reclamation or crypto), or missing edge case handling -> REJECT IT.
-    4. If the explanation is vague -> REJECT IT.
-    5. Partial credit is NOT allowed for "almost correct". It's pass (APPROVED) or fail (REJECTED).
-    6. If Approved, suggest a score from 20 to ${challenge.points} based on quality/elegance. (Usually full points only if perfect).
+    2. BE EXTREMELY STRICT.
+    3. The user MUST provide only Code or Pseudocode. Lengthy explanations strictly prohibited unless asked.
+    4. If the code is pseudocode, it must be logically perfect.
+    5. If there are any logical flaws, security risks, or missing edge case handling -> REJECT IT.
+    6. Partial credit is NOT allowed. It's pass (APPROVED) or fail (REJECTED).
+    7. If Approved, suggest a score from 20 to ${challenge.points} based on quality/elegance.
     
     Return your response in JSON format only:
     {
         "status": "APPROVED" | "REJECTED",
         "score": number,
-        "feedback": "Strict feedback here..."
+        "feedback": "Strict feedback here. Focus on the code errors."
     }
     `;
 

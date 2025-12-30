@@ -7,10 +7,11 @@ import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
 
 export const dynamic = 'force-dynamic';
 
-export default async function ChallengeDetailPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+export default async function ChallengeDetailPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    const { id: challengeId } = params;
 
-    const { id: challengeId } = await Promise.resolve(params); // Just in case it's not a promise yet (older next 14) but standardizing. 
+
 
     const session = await getServerSession(authOptions);
 

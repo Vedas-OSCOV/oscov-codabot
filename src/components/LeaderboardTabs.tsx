@@ -1,9 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-// We need to import styles but CSS modules might be tricky in client component if passing classes from parent?
-// I'll use inline styles or accept children. 
-// Better: Accept two lists of users and render the table.
 
 export default function LeaderboardTabs({ regularUsers, semester1Users, styles }: any) {
     const [activeTab, setActiveTab] = useState<'regular' | 'sem1'>('regular');
