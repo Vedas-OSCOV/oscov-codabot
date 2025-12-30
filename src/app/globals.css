@@ -1,73 +1,133 @@
 :root {
-  /* Dynamic White/Silver Palette */
-  --background: #fbfbfd;
-  --foreground: #1d1d1f;
+  /* Retro Palette */
+  --bg-color: #050505;
+  --grid-color: #1a1a1a;
+  --primary: #DC2626; /* Red */
+  --primary-glow: rgba(220, 38, 38, 0.5);
+  --text-main: #ffffff;
+  --text-dim: #888888;
+  --border-color: #ffffff;
   
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-  
-  --accent: #0071e3;
-  --accent-glow: rgba(0, 113, 227, 0.3);
-  
-  --text-primary: #1d1d1f;
-  --text-secondary: #86868b;
-  --text-tertiary: #d2d2d7;
-
-  /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  
-  /* Spacing */
-  --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 32px;
+  --font-retro: "Press Start 2P", cursive;
+  --font-mono: "Share Tech Mono", monospace;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  color: var(--text-main);
+  font-family: var(--font-mono); /* Default readability */
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline Effect */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  position: fixed;
+}
+
+h1, h2, h3, h4, .retro-font {
+  font-family: var(--font-retro);
+  text-transform: uppercase;
+  letter-spacing: -1px;
 }
 
 a {
-  color: inherit;
   text-decoration: none;
+  color: inherit;
 }
 
-* {
-  box-sizing: border-box;
+/* Retro Window (Nes.css style but custom) */
+.glass-panel, .retro-window {
+  background: #000;
+  border: 4px solid var(--border-color);
+  box-shadow: 8px 8px 0px rgba(255, 255, 255, 0.2);
+  border-radius: 0 !important; /* No rounded corners in 8-bit */
+  position: relative;
+  /* Inner bevel feel */
+  padding: 24px;
 }
 
-/* Utilities for Glassmorphism */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-md);
+.retro-window::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  border-bottom: 2px solid var(--grid-color);
+  margin-bottom: 16px;
 }
 
-.button-primary {
-  background: var(--foreground);
+/* Buttons */
+.button-primary, button {
+  font-family: var(--font-retro);
+  font-size: 12px;
+  background: var(--primary);
   color: white;
-  padding: 12px 24px;
-  border-radius: 999px;
-  border: none;
-  font-weight: 500;
-  font-size: 15px;
-  transition: all 0.2s ease;
+  border: 4px solid white;
+  padding: 12px 20px;
+  box-shadow: 4px 4px 0px #880000;
+  border-radius: 0 !important;
   cursor: pointer;
+  transition: transform 0.1s;
+  text-transform: uppercase;
+  display: inline-block;
 }
 
-.button-primary:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.button-primary:hover, button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #880000;
+}
+
+.button-primary:active, button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+/* Inputs */
+input, textarea, select {
+  background: #000;
+  border: 2px solid #555;
+  color: white;
+  font-family: var(--font-mono);
+  padding: 12px;
+  outline: none;
+  border-radius: 0 !important;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #fff;
+  border: 2px solid #000;
 }

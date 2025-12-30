@@ -20,40 +20,59 @@ export default async function Navbar() {
     }
 
     return (
-        <nav className={styles.nav}>
-            <div className={styles.container}>
-                <Link href="/" className={styles.logo}>
-                    Vedas-OSCOV
+        <nav className={styles.nav} style={{
+            background: '#000',
+            borderBottom: '4px solid white',
+            padding: '20px 0',
+            position: 'sticky',
+            top: 0,
+            zIndex: 100
+        }}>
+            <div className={styles.container} style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
+                <Link href="/" className={styles.logo} style={{
+                    fontFamily: '"Press Start 2P", cursive',
+                    color: '#fff',
+                    fontSize: '16px',
+                    textShadow: '2px 2px #DC2626'
+                }}>
+                    VEDAS_OSCOV
                 </Link>
-                <div className={styles.links}>
-                    <Link href="/challenges" className={styles.link}>
-                        Challenges
+                <div className={styles.links} style={{ display: 'flex', gap: '24px', alignItems: 'center', fontFamily: '"Share Tech Mono", monospace' }}>
+                    <Link href="/challenges" className={styles.link} style={{ textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        [Challenges]
                     </Link>
-                    <Link href="/leaderboard" className={styles.link}>
-                        Leaderboard
+                    <Link href="/leaderboard" className={styles.link} style={{ textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        [Leaderboard]
                     </Link>
                     {session ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             {session.user?.image && (
                                 <img
                                     src={session.user.image}
                                     alt="Profile"
-                                    style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid #eee' }}
+                                    style={{ width: 32, height: 32, border: '2px solid white', borderRadius: '0' }}
                                 />
                             )}
-                            <Link href="/dashboard" className={styles.link}>
-                                Dashboard
+                            <Link href="/dashboard" className={styles.link} style={{ textTransform: 'uppercase' }}>
+                                DASHBOARD
                             </Link>
                             {session.user?.role === 'ADMIN' && (
-                                <Link href="/admin" className={styles.link}>
-                                    Admin
+                                <Link href="/admin" className={styles.link} style={{ color: '#DC2626' }}>
+                                    ADMIN_SHELL
                                 </Link>
                             )}
                             <SignOutButton />
                         </div>
                     ) : (
-                        <Link href="/api/auth/signin" className={styles.login}>
-                            Sign In
+                        <Link href="/api/auth/signin" style={{
+                            fontFamily: '"Press Start 2P"',
+                            fontSize: '10px',
+                            background: '#fff',
+                            color: '#000',
+                            padding: '10px 16px',
+                            border: '2px solid #DC2626'
+                        }}>
+                            INSERT COIN
                         </Link>
                     )}
                 </div>
