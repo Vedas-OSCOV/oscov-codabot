@@ -117,6 +117,9 @@ export default function AdminDashboard() {
                         <a href="/admin/usage" className="button-primary" style={{ textAlign: 'center', fontSize: '12px', background: '#7c3aed', borderColor: '#6d28d9' }}>
                             USAGE_METRICS
                         </a>
+                        <a href="/admin/monitoring" className="button-primary" style={{ textAlign: 'center', fontSize: '12px', background: '#059669', borderColor: '#047857' }}>
+                            DEEP_MONITORING
+                        </a>
                         <a href="/admin/submissions" className="button-secondary" style={{ textAlign: 'center', fontSize: '12px', background: '#333', color: '#fff' }}>
                             VIEW_RAW_LOGS
                         </a>
