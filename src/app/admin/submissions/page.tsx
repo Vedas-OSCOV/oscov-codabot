@@ -4,8 +4,21 @@ import SubmissionActions from '@/components/SubmissionActions';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ReviewSubmissions() {
+export default async function ReviewSubmissions({
+    searchParams
+}: {
+    searchParams: { userId?: string }
+}) {
+    const where = searchParams.userId ? { userId: searchParams.userId } : {};
+
+    // Fetch filter context if needed
+    let filterUser = null;
+    if (searchParams.userId) {
+        filterUser = await prisma.user.findUnique({ where: { id: searchParams.userId } });
+    }
+
     const submissions = await prisma.submission.findMany({
+        where,
         orderBy: { createdAt: 'desc' },
         include: {
             user: true,
@@ -18,7 +31,14 @@ export default async function ReviewSubmissions() {
             <h1 className={styles.title}>Review Submissions</h1>
 
             <div className={styles.filterBar}>
-                <span className={styles.activeFilter}>All</span>
+                {filterUser ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e0f2fe', color: '#0369a1', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', border: '1px solid #bae6fd' }}>
+                        <span>FILTERING: <strong>{filterUser.name}</strong></span>
+                        <a href="/admin/submissions" style={{ marginLeft: 'auto', color: '#0369a1', textDecoration: 'underline' }}>Clear</a>
+                    </div>
+                ) : (
+                    <span className={styles.activeFilter}>All Submissions</span>
+                )}
             </div>
 
             <div className={styles.list}>

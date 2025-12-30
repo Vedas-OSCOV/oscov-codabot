@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { submitChallenge } from '@/app/actions/submit-challenge';
 import Editor from '@monaco-editor/react';
 
@@ -16,7 +16,7 @@ export default function ChallengeSubmissionForm({
     const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number } | null>(
         previousSubmission ? { success: previousSubmission.status === 'APPROVED', status: previousSubmission.status, feedback: previousSubmission.aiFeedback, points: previousSubmission.aiScore } : null
     );
-    const [pending, setPending] = useState(false);
+
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
     const [remainingTime, setRemainingTime] = useState<number | null>(null);
 
@@ -67,30 +67,29 @@ export default function ChallengeSubmissionForm({
         return () => clearInterval(interval);
     }, [remainingTime]);
 
+    const [isPending, startTransition] = useTransition();
+
     async function handleSubmit(formData: FormData) {
-        setPending(true);
         // We use the state 'code' instead of getting it from formData's textarea
         const content = code;
 
-        try {
-            const res = await submitChallenge(challengeId, content);
-            setResult(res as any);
+        startTransition(async () => {
+            try {
+                const res = await submitChallenge(challengeId, content);
+                setResult(res as any);
 
-            // If rate limited (pre-check failed)
-            if (!res.success && res.rateLimitMs) {
-                setRemainingTime(res.rateLimitMs);
+                // If rate limited (pre-check failed)
+                if (!res.success && res.rateLimitMs) {
+                    setRemainingTime(res.rateLimitMs);
+                }
+                else if (res.status === 'REJECTED') {
+                    const expirationTime = 5 * 60 * 1000; // 5 mins
+                    setRemainingTime(expirationTime);
+                }
+            } catch (e: any) {
+                setResult({ success: false, message: e.message || "An error occurred" });
             }
-            // If submitted and REJECTED (fresh failure)
-            else if (res.status === 'REJECTED') {
-                // Start the countdown immediately
-                const expirationTime = 5 * 60 * 1000; // 5 mins
-                setRemainingTime(expirationTime);
-            }
-        } catch (e: any) {
-            setResult({ success: false, message: e.message || "An error occurred" });
-        } finally {
-            setPending(false);
-        }
+        });
     }
 
     // Format remaining time as MM:SS
@@ -191,15 +190,15 @@ export default function ChallengeSubmissionForm({
 
             <button
                 type="submit"
-                disabled={pending || isRateLimited}
+                disabled={isPending || isRateLimited}
                 style={{
-                    background: (pending || isRateLimited) ? '#9ca3af' : '#0071e3',
+                    background: (isPending || isRateLimited) ? '#9ca3af' : '#0071e3',
                     // ... existing styles ...
                     justifyContent: 'center'
                 }}
             >
-                {pending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
-                {pending ? 'Processing...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
+                {isPending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
+                {isPending ? 'Processing...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
                 <style jsx>{`
                     @keyframes spin {
                         to { transform: rotate(360deg); }

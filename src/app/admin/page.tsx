@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './admin-page.module.css';
+import { getAdminStats } from '@/app/actions/admin-stats';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null);
@@ -10,9 +11,8 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch('/api/stats');
-                const data = await res.json();
-                setStats(data.stats);
+                const data = await getAdminStats();
+                setStats(data);
             } catch (e) {
                 console.error("Polling error", e);
             } finally {
@@ -21,7 +21,8 @@ export default function AdminDashboard() {
         };
 
         fetchStats();
-        const interval = setInterval(fetchStats, 5000); // Poll every 5s
+        // Poll less frequently to save DB calls, maybe 15s
+        const interval = setInterval(fetchStats, 15000);
 
         return () => clearInterval(interval);
     }, []);
@@ -31,43 +32,122 @@ export default function AdminDashboard() {
 
             <div className={styles.header}>
                 <h1 className={styles.title} style={{ color: '#DC2626', textShadow: '2px 2px white' }}>ADMIN_ROOT</h1>
-                <p className={styles.date} style={{ fontFamily: '"Share Tech Mono"', color: '#fff' }}>SYSTEM STATUS: ONLINE</p>
-                {loading && <span style={{ color: '#0f0', fontSize: '10px' }}>[SYNCING...]</span>}
+                <p className={styles.date} style={{ fontFamily: '"Share Tech Mono"', color: '#fff' }}>
+                    SYSTEM STATUS: {loading ? 'SYNCING...' : 'ONLINE'}
+                </p>
             </div>
 
+            {/* Top Row: KPIs */}
             <div className={styles.grid}>
                 <div className="retro-window" style={{ flex: 1 }}>
-                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>ISSUES_DB</h3>
-                    <p className={styles.cardDesc}>Manage Challenge Set</p>
-                    <a href="/admin/issues" className="button-primary" style={{ display: 'inline-block', marginTop: '16px', fontSize: '10px' }}>
-                        INJECT_ISSUE
-                    </a>
-                </div>
-
-                <div className="retro-window" style={{ flex: 1 }}>
-                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>QUEUE_DEPTH</h3>
-                    <p className={styles.bigNumber} style={{ color: '#DC2626', textShadow: '2px 2px 0px white' }}>
+                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>TOTAL_OPS</h3>
+                    <p className={styles.bigNumber} style={{ color: '#fff', textShadow: '2px 2px 0px #DC2626' }}>
                         {stats?.totalSubmissions || 0}
                     </p>
-                    <p className={styles.cardDesc}>Total Submissions</p>
+                    <p className={styles.cardDesc}>Global Submissions</p>
                 </div>
 
                 <div className="retro-window" style={{ flex: 1 }}>
-                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>NETWORK_TRAFFIC</h3>
-                    <div className={styles.statRow} style={{ borderBottom: '1px dashed #555' }}>
-                        <span>ACTIVE_NODES</span>
-                        <span style={{ color: '#0f0' }}>{stats?.activeUsers || 0}</span>
-                    </div>
+                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>ACTIVE_NODES</h3>
+                    <p className={styles.bigNumber} style={{ color: '#0f0', textShadow: '2px 2px 0px #000' }}>
+                        {stats?.activeUsersCount || 0}
+                    </p>
+                    <p className={styles.cardDesc}>Users Online</p>
+                </div>
+
+                <div className="retro-window" style={{ flex: 1 }}>
+                    <h3 className={styles.cardTitle} style={{ color: '#fff' }}>BURN_RATE estimated</h3>
+                    <p className={styles.bigNumber} style={{ color: '#fbbf24', textShadow: '2px 2px 0px #000' }}>
+                        ${stats?.estimatedCost?.toFixed(2) || '0.00'}
+                    </p>
+                    <p className={styles.cardDesc}>OpenAI Cost (Approx)</p>
                 </div>
             </div>
 
+            {/* Middle Row: Charts & Logs */}
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '24px' }}>
+
+                {/* Usage Chart */}
+                <div className="retro-window" style={{ flex: 2, minWidth: '300px' }}>
+                    <h3 style={{ color: 'white', marginBottom: '16px' }}>TRAFFIC_VOLUME (7 DAYS)</h3>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '150px', gap: '5%', paddingBottom: '20px', borderBottom: '1px solid #333' }}>
+                        {stats?.usageHistory?.map((day: any) => {
+                            // Normalize height
+                            const max = Math.max(...stats.usageHistory.map((d: any) => d.count)) || 1;
+                            const height = Math.max((day.count / max) * 100, 5); // min 5%
+                            return (
+                                <div key={day.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ width: '100%', height: `${height}%`, background: '#DC2626', minHeight: '4px' }} title={`${day.count} submissions`}></div>
+                                    <span style={{ fontSize: '10px', color: '#666', transform: 'rotate(-45deg)', transformOrigin: 'left bottom', whiteSpace: 'nowrap' }}>
+                                        {day.date.slice(5)}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* System Menu */}
+                <div className="retro-window" style={{ flex: 1, minWidth: '200px' }}>
+                    <h3 style={{ color: 'white', marginBottom: '16px' }}>CONTROLS</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <a href="/admin/issues" className="button-primary" style={{ textAlign: 'center', fontSize: '12px' }}>
+                            MANAGE_CHALLENGES
+                        </a>
+                        <a href="/admin/usage" className="button-primary" style={{ textAlign: 'center', fontSize: '12px', background: '#7c3aed', borderColor: '#6d28d9' }}>
+                            USAGE_METRICS
+                        </a>
+                        <a href="/admin/submissions" className="button-secondary" style={{ textAlign: 'center', fontSize: '12px', background: '#333', color: '#fff' }}>
+                            VIEW_RAW_LOGS
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            {/* Bottom Row: User Table */}
             <div className="retro-window" style={{ marginTop: '24px' }}>
-                <h3 style={{ color: 'white', marginBottom: '16px' }}>SYSTEM_LOGS</h3>
-                <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#0f0', background: '#000', padding: '12px', height: '150px', overflow: 'hidden' }}>
-                    &gt; Polling /api/stats... OK<br />
-                    &gt; Verify Integrity... OK<br />
-                    &gt; AI_JUDGE: LISTENING<br />
-                    {stats && <span>&gt; UPDATE_RX: {new Date().toLocaleTimeString()}</span>}
+                <h3 style={{ color: 'white', marginBottom: '16px' }}>NODE_LIST (ACTIVE USERS)</h3>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', color: '#ccc', fontFamily: 'monospace' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '2px solid #333', textAlign: 'left' }}>
+                                <th style={{ padding: '8px', color: '#DC2626' }}>USER_ID</th>
+                                <th style={{ padding: '8px', color: '#DC2626' }}>TOTAL_SUBMITS</th>
+                                <th style={{ padding: '8px', color: '#DC2626' }}>LAST_ACTIVE</th>
+                                <th style={{ padding: '8px', color: '#DC2626' }}>RISK_SCORE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {stats?.userStats?.map((u: any) => (
+                                <tr key={u.id} style={{ borderBottom: '1px solid #222' }}>
+                                    <td style={{ padding: '8px' }}>
+                                        <a href={`/admin/submissions?userId=${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }} title="View Submissions">
+                                            {u.image && <img src={u.image} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />}
+                                            <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>{u.name || u.email}</span>
+                                        </a>
+                                    </td>
+                                    <td style={{ padding: '8px' }}>{u.totalSubmissions}</td>
+                                    <td style={{ padding: '8px' }}>{u.lastActive ? new Date(u.lastActive).toLocaleDateString() : 'N/A'}</td>
+                                    <td style={{ padding: '8px' }}>
+                                        <span style={{
+                                            color: u.riskScore > 80 ? '#ef4444' : u.riskScore > 50 ? '#eab308' : '#22c55e',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {u.riskScore}%
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                            {(!stats?.userStats || stats.userStats.length === 0) && (
+                                <tr>
+                                    <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: '#666' }}>
+                                        NO_ACTIVE_NODES_DETECTED
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
