@@ -94,7 +94,9 @@ export default async function UsagePage() {
                                         )}
                                     </div>
                                     <div style={{ fontSize: '10px', color: '#888', writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: '100px', textAlign: 'left' }}>
-                                        {user.name || user.email}
+                                        <a href={`/admin/users/${user.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                                            {user.name || user.email}
+                                        </a>
                                     </div>
                                 </div>
                             </div>

@@ -16,11 +16,11 @@ export default function AdminLayout({
                     <Link href="/admin" className={styles.link}>
                         Overview
                     </Link>
-                    <Link href="/admin/issues" className={styles.link}>
-                        Manage Issues
+                    <Link href="/admin/usage" className={styles.link}>
+                        Usage Metrics
                     </Link>
-                    <Link href="/admin/submissions" className={styles.link}>
-                        Review Submissions
+                    <Link href="/admin/monitoring" className={styles.link}>
+                        Deep Monitoring
                     </Link>
                     <div className={styles.divider} />
                     <Link href="/" className={styles.backLink}>

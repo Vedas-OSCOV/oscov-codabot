@@ -146,7 +146,7 @@ export default function AdminDashboard() {
                             {stats?.userStats?.map((u: any) => (
                                 <tr key={u.id} style={{ borderBottom: '1px solid #222', opacity: u.isBanned ? 0.5 : 1 }}>
                                     <td style={{ padding: '8px' }}>
-                                        <a href={`/admin/submissions?userId=${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: u.isBanned ? '#ef4444' : 'inherit' }} title="View Submissions">
+                                        <a href={`/admin/users/${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: u.isBanned ? '#ef4444' : 'inherit' }} title="View Deep Profile">
                                             {u.image && <img src={u.image} style={{ width: '20px', height: '20px', borderRadius: '50%', filter: u.isBanned ? 'grayscale(100%)' : 'none' }} />}
                                             <span style={{ textDecoration: u.isBanned ? 'line-through' : 'underline', textDecorationStyle: 'dotted' }}>{u.name || u.email}</span>
                                             {u.isBanned && <span style={{ fontSize: '10px', background: '#DC2626', color: 'white', padding: '2px 4px', borderRadius: '2px' }}>BANNED</span>}
