@@ -1,2 +1,5 @@
-[node]
-version = "20"
+# Nixpacks configuration
+providers = ["node"]
+
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm"]
