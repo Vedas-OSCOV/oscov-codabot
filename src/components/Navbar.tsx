@@ -4,8 +4,20 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import SignOutButton from './SignOutButton';
 
+import { prisma } from '@/lib/db';
+
 export default async function Navbar() {
     const session = await getServerSession(authOptions);
+    let isSemester1 = false;
+
+    if (session?.user?.email) {
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
+        if (user?.semester === 1) {
+            isSemester1 = true;
+        }
+    }
 
     return (
         <nav className={styles.nav}>
@@ -14,9 +26,15 @@ export default async function Navbar() {
                     Vedas-OSCOV
                 </Link>
                 <div className={styles.links}>
-                    <Link href="/issues" className={styles.link}>
-                        Issues
-                    </Link>
+                    {isSemester1 ? (
+                        <Link href="/challenges" className={styles.link}>
+                            Challenges
+                        </Link>
+                    ) : (
+                        <Link href="/issues" className={styles.link}>
+                            Issues
+                        </Link>
+                    )}
                     <Link href="/leaderboard" className={styles.link}>
                         Leaderboard
                     </Link>
