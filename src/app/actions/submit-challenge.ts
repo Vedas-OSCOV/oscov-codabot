@@ -26,8 +26,10 @@ export async function submitChallenge(challengeId: string, content: string) {
     });
 
     if (existing && existing.status === 'APPROVED') {
-        return { success: false, message: "You have already solved this challenge." };
+        return { success: false, message: "You have already completed this challenge successfully. Re-submissions are not allowed for approved challenges." };
     }
+    // If existing but REJECTED (or PENDING), we allow re-submission (it will upsert/update below).
+
 
     const challenge = await prisma.challenge.findUnique({
         where: { id: challengeId }
@@ -90,7 +92,6 @@ export async function submitChallenge(challengeId: string, content: string) {
     const status = aiResult.status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
     const score = aiResult.status === 'APPROVED' ? (aiResult.score || challenge.points) : 0;
 
-    // Update user score if approved
     if (status === 'APPROVED') {
         await prisma.user.update({
             where: { id: session.user.id },
@@ -98,7 +99,6 @@ export async function submitChallenge(challengeId: string, content: string) {
         });
     }
 
-    // Upsert submission
     if (existing) {
         await prisma.submission.update({
             where: { id: existing.id },
