@@ -95,7 +95,7 @@ export async function submitChallenge(challengeId: string, content: string) {
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
-                { role: "system", content: "You are a strict code reviewer. Return JSON only." },
+                { role: "system", content: "You are an extremely strict code reviewer. Return JSON only." },
                 { role: "user", content: prompt }
             ],
             response_format: { type: "json_object" }
