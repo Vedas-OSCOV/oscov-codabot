@@ -7,8 +7,8 @@ import OpenAI from "openai";
 import { revalidatePath } from "next/cache";
 
 export async function submitChallenge(challengeId: string, content: string) {
-    if (!content || content.length < 10) {
-        throw new Error("Submission is too short.");
+    if (content.length > 20000) {
+        throw new Error("Submission too large (max 20k characters).");
     }
 
     const session = await getServerSession(authOptions);
@@ -69,54 +69,28 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     const isSenior = (user?.semester || 0) > 1;
 
-    const basePrompt = `
-    Problem: ${challenge.title}
-    Description: ${challenge.description}
-    Points: ${challenge.points}
-
-    Student Submission:
-    "${content}"
-    `;
-
-    // Strict Mode for Semesters 2-8
-    const strictInstructions = isSenior ? `
-    Your task:
-    1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
-    2. Check for logic, edge cases, and efficiency.
-    3. The solution must be fully functional code (Python, JS, C++, etc).
-    4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
-    5. Be extremely harsh. This is a senior level challenge.
-    6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
-    ` : `
-    Your task:
-    1. Verify if the submission is correct (Code or Pseudocode allowed).
-    2. If pseudocode, it must be logically perfect.
-    3. Be strict but fair for beginners.
-    `;
-
-    const prompt = `
-    You are a strictly academic Computer Science judge.
-    ${basePrompt}
-
-    ${strictInstructions}
-
-    6. Partial credit is NOT allowed. PASS (APPROVED) or FAIL (REJECTED).
-    7. If Approved, suggest a score from 20 to ${challenge.points} based on quality.
-    
-    Return your response in JSON format only:
-    {
-        "status": "APPROVED" | "REJECTED",
-        "score": number,
-        "feedback": "Feedback here. For Rejections, explain exactly why (e.g. 'Pseudocode not allowed', 'Syntax error')."
-    }
-    `;
+    // Optimized Prompt
+    const prompt = `Task:Strict academic CS judge.
+Problem:${challenge.title}
+Desc:${challenge.description}
+Pts:${challenge.points}
+Code:
+"${content}"
+Instructions:
+1.Verify if EXECUTABLE CODE. REJECT pseudocode.
+2.Check logic, edge cases, efficiency.
+3.Must be functional.
+${isSenior ? '4.Incomplete/Syntax/Logic errors->REJECT. Be EXTREMELY HARSH (Senior Level).' : '4.Pseudocode allowed if logically perfect. Be strict but fair.'}
+5.PASS (APPROVED) or FAIL (REJECTED).
+6.If Approved, suggest score 20-${challenge.points}.
+Return JSON:{"status":"APPROVED"|"REJECTED","score":number,"feedback":"Short feedback explaining why."}`;
 
     let aiResult;
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             messages: [
-                { role: "system", content: "You are an extremely strict code reviewer. Return JSON only." },
+                { role: "system", content: "You are a code judge. Return JSON only." },
                 { role: "user", content: prompt }
             ],
             response_format: { type: "json_object" }
