@@ -26,7 +26,14 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
     }
 
     const submission = await prisma.submission.findFirst({
-        where: { userId: session.user.id, challengeId: challenge.id }
+        where: { userId: session.user.id, challengeId: challenge.id },
+        select: {
+            id: true,
+            status: true,
+            aiFeedback: true,
+            awardedPoints: true,
+            lastSubmittedAt: true
+        }
     });
 
     const isSolved = submission?.status === 'APPROVED';

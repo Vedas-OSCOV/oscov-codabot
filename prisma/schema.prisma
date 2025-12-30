@@ -122,13 +122,14 @@ model Submission {
   prUrl   String? // Optional for challenges (text/code submission)
   content String? @db.Text // For code/text answers
 
-  aiFeedback    String?          @db.Text
-  aiScore       Int?
-  status        SubmissionStatus @default(PENDING_AI)
-  isMerged      Boolean          @default(false)
-  awardedPoints Int              @default(0)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  aiFeedback      String?          @db.Text
+  aiScore         Int?
+  status          SubmissionStatus @default(PENDING_AI)
+  isMerged        Boolean          @default(false)
+  awardedPoints   Int              @default(0)
+  lastSubmittedAt DateTime? // Track last submission time for rate limiting
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   // Unique constraint for Users per Issue OR Challenge?
   // We can't really enforce "either issueId or challengeId" easily with unique index in standard Prisma without some complexity

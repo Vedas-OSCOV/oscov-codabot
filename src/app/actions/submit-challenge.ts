@@ -28,6 +28,22 @@ export async function submitChallenge(challengeId: string, content: string) {
     if (existing && existing.status === 'APPROVED') {
         return { success: false, message: "You have already completed this challenge successfully. Re-submissions are not allowed for approved challenges." };
     }
+
+    // Rate limiting: Check if user is trying to resubmit too soon
+    if (existing && existing.lastSubmittedAt) {
+        const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const timeSinceLastSubmit = Date.now() - existing.lastSubmittedAt.getTime();
+
+        if (timeSinceLastSubmit < RATE_LIMIT_MS) {
+            const remainingMs = RATE_LIMIT_MS - timeSinceLastSubmit;
+            const remainingMinutes = Math.ceil(remainingMs / 60000);
+            return {
+                success: false,
+                message: `Rate limit: Please wait ${remainingMinutes} minute(s) before resubmitting.`,
+                rateLimitMs: remainingMs
+            };
+        }
+    }
     // If existing but REJECTED (or PENDING), we allow re-submission (it will upsert/update below).
 
 
@@ -129,6 +145,7 @@ export async function submitChallenge(challengeId: string, content: string) {
                 aiScore: score,
                 status: status,
                 awardedPoints: score,
+                lastSubmittedAt: new Date(),
                 updatedAt: new Date()
             }
         });
@@ -141,7 +158,8 @@ export async function submitChallenge(challengeId: string, content: string) {
                 aiFeedback: aiResult.feedback,
                 aiScore: score,
                 status: status,
-                awardedPoints: score
+                awardedPoints: score,
+                lastSubmittedAt: new Date()
             }
         });
     }

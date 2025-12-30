@@ -1,15 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { submitChallenge } from '@/app/actions/submit-challenge';
 import Editor from '@monaco-editor/react';
 
 export default function ChallengeSubmissionForm({ challengeId, previousSubmission }: { challengeId: string, previousSubmission: any }) {
-    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string } | null>(
+    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number } | null>(
         previousSubmission ? { success: previousSubmission.status === 'APPROVED', status: previousSubmission.status, feedback: previousSubmission.aiFeedback, points: previousSubmission.aiScore } : null
     );
     const [pending, setPending] = useState(false);
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
+    const [remainingTime, setRemainingTime] = useState<number | null>(null);
+
+    // Calculate initial remaining time from previousSubmission
+    useEffect(() => {
+        if (previousSubmission?.lastSubmittedAt && previousSubmission.status !== 'APPROVED') {
+            const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+            const lastSubmitTime = new Date(previousSubmission.lastSubmittedAt).getTime();
+            const elapsed = Date.now() - lastSubmitTime;
+            const remaining = RATE_LIMIT_MS - elapsed;
+
+            if (remaining > 0) {
+                setRemainingTime(remaining);
+            }
+        }
+    }, [previousSubmission]);
+
+    // Countdown timer
+    useEffect(() => {
+        if (remainingTime === null || remainingTime <= 0) return;
+
+        const interval = setInterval(() => {
+            setRemainingTime(prev => {
+                if (prev === null || prev <= 1000) {
+                    clearInterval(interval);
+                    return null;
+                }
+                return prev - 1000;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [remainingTime]);
 
     async function handleSubmit(formData: FormData) {
         setPending(true);
@@ -19,12 +51,27 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
         try {
             const res = await submitChallenge(challengeId, content);
             setResult(res as any);
+
+            // If rate limited, set the remaining time for countdown
+            if (!res.success && res.rateLimitMs) {
+                setRemainingTime(res.rateLimitMs);
+            }
         } catch (e: any) {
             setResult({ success: false, message: e.message || "An error occurred" });
         } finally {
             setPending(false);
         }
     }
+
+    // Format remaining time as MM:SS
+    const formatTime = (ms: number) => {
+        const totalSeconds = Math.ceil(ms / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}m ${seconds}s`;
+    };
+
+    const isRateLimited = remainingTime !== null && remainingTime > 0;
 
     if (result && result.status === 'APPROVED') {
         return (
@@ -61,6 +108,36 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                 <div style={{ color: 'red', marginBottom: '16px' }}>{result.message}</div>
             )}
 
+            {/* Rate Limit Warning */}
+            {isRateLimited && (
+                <div style={{
+                    padding: '16px',
+                    background: '#1a1a1a',
+                    border: '2px solid #DC2626',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    fontFamily: '"Share Tech Mono"'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <span style={{
+                            fontSize: '10px',
+                            color: '#000',
+                            background: '#DC2626',
+                            padding: '6px 12px',
+                            fontFamily: '"Press Start 2P"'
+                        }}>
+                            RATE_LIMIT
+                        </span>
+                        <span style={{ color: '#DC2626', fontSize: '16px', fontWeight: 'bold' }}>
+                            {formatTime(remainingTime)}
+                        </span>
+                    </div>
+                    <p style={{ margin: 0, color: '#ccc', fontSize: '14px' }}>
+                        Please wait before resubmitting. This prevents excessive API usage on our end.
+                    </p>
+                </div>
+            )}
+
             <div style={{ marginBottom: '16px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
                 <div style={{ background: '#f5f5f5', padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
 
@@ -84,16 +161,16 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
 
             <button
                 type="submit"
-                disabled={pending}
+                disabled={pending || isRateLimited}
                 style={{
-                    background: pending ? '#9ca3af' : '#0071e3',
+                    background: (pending || isRateLimited) ? '#9ca3af' : '#0071e3',
                     color: 'white',
                     padding: '12px 32px',
                     borderRadius: '99px',
                     border: 'none',
                     fontWeight: '600',
-                    cursor: pending ? 'not-allowed' : 'pointer',
-                    opacity: pending ? 0.9 : 1,
+                    cursor: (pending || isRateLimited) ? 'not-allowed' : 'pointer',
+                    opacity: (pending || isRateLimited) ? 0.9 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
@@ -102,7 +179,7 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                 }}
             >
                 {pending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
-                {pending ? 'Grading Solution...' : 'Submit Solution'}
+                {pending ? 'Grading Solution...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
                 <style jsx>{`
                     @keyframes spin {
                         to { transform: rotate(360deg); }
