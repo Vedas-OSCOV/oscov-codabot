@@ -65,6 +65,7 @@ export async function submitChallenge(challengeId: string, content: string) {
     3. The solution must be fully functional code (Python, JS, C++, etc).
     4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
     5. Be extremely harsh. This is a senior level challenge.
+    6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
     ` : `
     Your task:
     1. Verify if the submission is correct (Code or Pseudocode allowed).
