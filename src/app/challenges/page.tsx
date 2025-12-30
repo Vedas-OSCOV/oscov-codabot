@@ -19,16 +19,8 @@ export default async function ChallengesPage() {
         select: { semester: true }
     });
 
-    if (user?.semester !== 1) {
-        return (
-            <main style={{ minHeight: '100vh', paddingTop: '100px', textAlign: 'center' }}>
-                <Navbar />
-                <h1>Access Denied</h1>
-                <p>These challenges are only for Semester 1 students.</p>
-                <Link href="/dashboard" style={{ color: '#0071e3' }}>Return to Dashboard</Link>
-            </main>
-        );
-    }
+    // Access Check Removed: Challenges are now open for all semesters.
+
 
     // Fetch challenges
     const challenges = await prisma.challenge.findMany({
@@ -47,6 +39,20 @@ export default async function ChallengesPage() {
         if (s.challengeId) submissionMap.set(s.challengeId, s);
     });
 
+    const isSenior = (user?.semester || 0) > 1;
+
+    // Filter challenges based on context
+    // Seniors: > 100 points (Hard/Extreme)
+    // Freshers: <= 100 points (Easy/Medium)
+    const filteredChallenges = challenges.filter(c =>
+        isSenior ? c.points > 100 : c.points <= 100
+    );
+
+    const title = isSenior ? "Senior Arena" : "Fresher's Gauntlet";
+    const subtitle = isSenior
+        ? "Advanced algorithmic and architectural challenges. Strict code-only validation."
+        : "Foundational problems to build your problem-solving intuition. Pseudocode allowed.";
+
     return (
         <main style={{ minHeight: '100vh', paddingTop: '100px', background: '#FAFAFA' }}>
             <Navbar />
@@ -55,15 +61,15 @@ export default async function ChallengesPage() {
                 <div style={{ marginBottom: '40px' }}>
                     <Link href="/dashboard" style={{ color: '#666', fontSize: '14px', marginBottom: '16px', display: 'inline-block' }}>← Back to Dashboard</Link>
                     <h1 style={{ fontSize: '40px', fontWeight: '700', marginBottom: '16px', backgroundImage: 'linear-gradient(135deg, #1d1d1f 0%, #434344 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        Challenges
+                        {title}
                     </h1>
                     <p style={{ fontSize: '18px', color: '#86868b', maxWidth: '600px' }}>
-                        Welcome to the gauntlet. These problems are designed to test your theoretical understanding and implementation skills to the limit.
+                        {subtitle}
                     </p>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                    {challenges.map(challenge => {
+                    {filteredChallenges.length > 0 ? filteredChallenges.map(challenge => {
                         const sub = submissionMap.get(challenge.id);
                         const isSolved = sub?.status === 'APPROVED';
                         const isPending = sub?.status === 'PENDING_AI';
@@ -98,7 +104,12 @@ export default async function ChallengesPage() {
                                 </p>
                             </Link>
                         );
-                    })}
+                    }) : (
+                        <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: '#666', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
+                            <h3>No challenges found for your level.</h3>
+                            <p>Check back later for updates.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>

@@ -2,17 +2,19 @@
 
 import { useState } from 'react';
 import { submitChallenge } from '@/app/actions/submit-challenge';
-import { useFormStatus } from 'react-dom';
+import Editor from '@monaco-editor/react';
 
 export default function ChallengeSubmissionForm({ challengeId, previousSubmission }: { challengeId: string, previousSubmission: any }) {
     const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string } | null>(
         previousSubmission ? { success: previousSubmission.status === 'APPROVED', status: previousSubmission.status, feedback: previousSubmission.aiFeedback, points: previousSubmission.aiScore } : null
     );
     const [pending, setPending] = useState(false);
+    const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
 
     async function handleSubmit(formData: FormData) {
         setPending(true);
-        const content = formData.get('content') as string;
+        // We use the state 'code' instead of getting it from formData's textarea
+        const content = code;
 
         try {
             const res = await submitChallenge(challengeId, content);
@@ -59,24 +61,24 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                 <div style={{ color: 'red', marginBottom: '16px' }}>{result.message}</div>
             )}
 
-            <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Your Solution</label>
-                <textarea
-                    name="content"
-                    rows={12}
-                    className="glass-panel"
-                    style={{
-                        width: '100%',
-                        padding: '16px',
-                        fontFamily: 'monospace',
-                        fontSize: '14px',
-                        minHeight: '200px',
-                        background: 'rgba(255,255,255,0.5)',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px'
+            <div style={{ marginBottom: '16px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                <div style={{ background: '#f5f5f5', padding: '8px 16px', borderBottom: '1px solid #e5e7eb', fontSize: '12px', color: '#666', display: 'flex', justifyContent: 'space-between' }}>
+
+                    <span>EDITOR MODE</span>
+                    <span>JAVASCRIPT / PYTHON / PSEUDO</span>
+                </div>
+                <Editor
+                    height="400px"
+                    defaultLanguage="javascript"
+                    theme="light"
+                    value={code}
+                    onChange={(value) => setCode(value || "")}
+                    options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true
                     }}
-                    placeholder="// Write your solution here... (Code or Pseudocode)"
-                    required
                 />
             </div>
 

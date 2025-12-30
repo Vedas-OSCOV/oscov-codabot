@@ -26,15 +26,9 @@ export default async function Navbar() {
                     Vedas-OSCOV
                 </Link>
                 <div className={styles.links}>
-                    {isSemester1 ? (
-                        <Link href="/challenges" className={styles.link}>
-                            Challenges
-                        </Link>
-                    ) : (
-                        <Link href="/issues" className={styles.link}>
-                            Issues
-                        </Link>
-                    )}
+                    <Link href="/challenges" className={styles.link}>
+                        Challenges
+                    </Link>
                     <Link href="/leaderboard" className={styles.link}>
                         Leaderboard
                     </Link>
