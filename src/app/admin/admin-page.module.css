@@ -1,21 +1,28 @@
 .container {
     animation: fadeIn 0.4s ease-out;
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .header {
     margin-bottom: 40px;
+    border-bottom: 4px solid var(--border-color);
+    padding-bottom: 20px;
 }
 
 .title {
     font-size: 32px;
     font-weight: 600;
     margin: 0;
+    font-family: var(--font-retro);
 }
 
 .date {
-    color: var(--text-secondary);
+    color: var(--text-dim);
     margin-top: 8px;
     font-size: 15px;
+    font-family: var(--font-mono);
 }
 
 .grid {
@@ -28,9 +35,10 @@
     font-size: 15px;
     font-weight: 600;
     margin: 0 0 8px 0;
-    color: var(--text-secondary);
+    color: var(--text-main);
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    font-family: var(--font-retro);
 }
 
 .bigNumber {
@@ -38,12 +46,15 @@
     font-weight: 700;
     margin: 16px 0;
     letter-spacing: -0.02em;
+    color: var(--primary);
+    font-family: var(--font-mono);
 }
 
 .cardDesc {
-    color: var(--text-secondary);
+    color: var(--text-dim);
     font-size: 14px;
     margin: 0;
+    font-family: var(--font-mono);
 }
 
 .statRow {
@@ -51,8 +62,8 @@
     justify-content: space-between;
     margin-top: 16px;
     font-size: 15px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     padding-bottom: 8px;
+    font-family: var(--font-mono);
 }
 
 @keyframes fadeIn {
