@@ -32,11 +32,11 @@ export default async function ReviewSubmissions() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                                 <div>
                                     <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>
-                                        <a href={sub.prUrl} target="_blank" style={{ textDecoration: 'underline' }}>PR Link</a>
+                                        <a href={sub.prUrl || undefined} target="_blank" style={{ textDecoration: 'underline' }}>PR Link</a>
                                         <span style={{ color: '#86868b', fontWeight: 'normal' }}> by {sub.user.name || 'Anonymous'}</span>
                                     </h3>
                                     <p style={{ margin: 0, fontSize: '13px', color: '#86868b' }}>
-                                        Issue: {sub.issue.title}
+                                        Issue: {sub.issue?.title || 'N/A'}
                                     </p>
                                 </div>
                                 <div className={styles.statusBadge} data-status={sub.status}>

@@ -14,6 +14,10 @@ export async function reviewSubmission(submissionId: string, decision: 'APPROVED
             return { error: 'Submission not found' };
         }
 
+        if (!submission.issue) {
+            return { error: 'Associated issue not found' };
+        }
+
         if (submission.status === 'APPROVED') {
             return { error: 'Submission already approved' };
         }
