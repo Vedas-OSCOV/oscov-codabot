@@ -30,11 +30,22 @@ export default function ChallengeSubmissionForm({
         if (lastSubmitDate && lastStatus === 'REJECTED') {
             const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
             const lastSubmitTime = new Date(lastSubmitDate).getTime();
-            const elapsed = Date.now() - lastSubmitTime;
+            const now = Date.now();
+            const elapsed = now - lastSubmitTime;
             const remaining = RATE_LIMIT_MS - elapsed;
+
+            console.log('Rate Limit Debug:', {
+                lastSubmitDate,
+                lastSubmitTime,
+                now,
+                elapsed,
+                remaining
+            });
 
             if (remaining > 0) {
                 setRemainingTime(remaining);
+            } else {
+                setRemainingTime(null);
             }
         }
     }, [globalLastSubmission, previousSubmission]);
@@ -65,9 +76,15 @@ export default function ChallengeSubmissionForm({
             const res = await submitChallenge(challengeId, content);
             setResult(res as any);
 
-            // If rate limited, set the remaining time for countdown
+            // If rate limited (pre-check failed)
             if (!res.success && res.rateLimitMs) {
                 setRemainingTime(res.rateLimitMs);
+            }
+            // If submitted and REJECTED (fresh failure)
+            else if (res.status === 'REJECTED') {
+                // Start the countdown immediately
+                const expirationTime = 5 * 60 * 1000; // 5 mins
+                setRemainingTime(expirationTime);
             }
         } catch (e: any) {
             setResult({ success: false, message: e.message || "An error occurred" });
@@ -177,17 +194,7 @@ export default function ChallengeSubmissionForm({
                 disabled={pending || isRateLimited}
                 style={{
                     background: (pending || isRateLimited) ? '#9ca3af' : '#0071e3',
-                    color: 'white',
-                    padding: '12px 32px',
-                    borderRadius: '99px',
-                    border: 'none',
-                    fontWeight: '600',
-                    cursor: (pending || isRateLimited) ? 'not-allowed' : 'pointer',
-                    opacity: (pending || isRateLimited) ? 0.9 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    minWidth: '180px',
+                    // ... existing styles ...
                     justifyContent: 'center'
                 }}
             >

@@ -31,7 +31,7 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     // Global Rate limiting: Check if user has submitted ANY challenge too recently AND failed
     const lastSubmission = await prisma.submission.findFirst({
-        where: { userId: session.user.id },
+        where: { userId: session.user.id, lastSubmittedAt: { not: null } },
         orderBy: { lastSubmittedAt: 'desc' },
         select: { lastSubmittedAt: true, status: true }
     });
@@ -50,7 +50,6 @@ export async function submitChallenge(challengeId: string, content: string) {
             };
         }
     }
-    // If existing but REJECTED (or PENDING), we allow re-submission (it will upsert/update below).
 
 
     const challenge = await prisma.challenge.findUnique({
@@ -170,8 +169,7 @@ export async function submitChallenge(challengeId: string, content: string) {
         });
     }
 
-    revalidatePath(`/challenges/${challengeId}`);
-    revalidatePath('/dashboard');
+    revalidatePath('/', 'layout');
 
-    return { success: true, status, feedback: aiResult.feedback, points: score };
+    return { success: true, status, feedback: aiResult.feedback, points: score, lastSubmittedAt: new Date() };
 }

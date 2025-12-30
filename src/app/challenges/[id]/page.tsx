@@ -38,7 +38,7 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
 
     // Fetch globally latest submission for rate limiting across ALL challenges
     const globalLatestSubmission = await prisma.submission.findFirst({
-        where: { userId: session.user.id },
+        where: { userId: session.user.id, lastSubmittedAt: { not: null } },
         orderBy: { lastSubmittedAt: 'desc' },
         select: { lastSubmittedAt: true, status: true }
     });
