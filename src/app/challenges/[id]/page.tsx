@@ -11,8 +11,6 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
     const params = await props.params;
     const { id: challengeId } = params;
 
-
-
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -34,47 +32,47 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
     const isSolved = submission?.status === 'APPROVED';
 
     return (
-        <main style={{ minHeight: '100vh', paddingTop: '100px', background: '#FAFAFA' }}>
+        <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
-                <a href="/challenges" style={{ color: '#666', fontSize: '14px', marginBottom: '24px', display: 'inline-block' }}>← Back to Challenges</a>
+                <a href="/challenges" style={{ color: '#888', fontSize: '14px', marginBottom: '24px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; BACK_TO_LIST</a>
 
                 <div style={{ marginBottom: '32px' }}>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#0071e3', background: 'rgba(0,113,227,0.1)', padding: '4px 12px', borderRadius: '99px' }}>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '10px', color: '#fff', background: '#DC2626', padding: '6px 12px', fontFamily: '"Press Start 2P"' }}>
                             {challenge.difficulty}
                         </span>
-                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', background: 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: '99px' }}>
-                            {challenge.points} Points
+                        <span style={{ fontSize: '10px', color: '#fff', border: '2px solid #fff', padding: '4px 12px', fontFamily: '"Press Start 2P"' }}>
+                            {challenge.points} PTS
                         </span>
                         {isSolved && (
-                            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#166534', background: '#dcfce7', padding: '4px 12px', borderRadius: '99px' }}>
+                            <span style={{ fontSize: '10px', color: '#000', background: '#0f0', padding: '6px 12px', fontFamily: '"Press Start 2P"' }}>
                                 SOLVED
                             </span>
                         )}
                     </div>
-                    <h1 style={{ fontSize: '36px', fontWeight: '700', margin: 0, lineHeight: 1.2 }}>{challenge.title}</h1>
+                    <h1 style={{ fontSize: '24px', margin: 0, lineHeight: 1.4, color: '#fff', textShadow: '2px 2px #DC2626' }}>{challenge.title}</h1>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '32px', marginBottom: '40px' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Problem Description</h2>
-                    <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#333' }}>
+                <div className="retro-window" style={{ padding: '32px', marginBottom: '40px' }}>
+                    <h2 style={{ fontSize: '16px', marginBottom: '24px', color: '#DC2626' }}>PROBLEM_DESCRIPTION</h2>
+                    <div style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc', fontFamily: '"Share Tech Mono"' }}>
                         {challenge.description}
-                    </p>
+                    </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '32px' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Submission</h2>
+                <div className="retro-window" style={{ padding: '32px' }}>
+                    <h2 style={{ fontSize: '16px', marginBottom: '24px', color: '#DC2626' }}>SUBMISSION_CONSOLE</h2>
 
                     {isSolved ? (
-                        <div style={{ padding: '24px', background: '#f0fdf4', borderRadius: '16px', border: '1px solid #bbf7d0' }}>
-                            <h3 style={{ margin: '0 0 8px 0', color: '#166534' }}>Challenge Complete!</h3>
-                            <p style={{ margin: 0, color: '#15803d' }}>
-                                You earned {submission?.awardedPoints} points.
+                        <div style={{ padding: '24px', border: '2px solid #0f0' }}>
+                            <h3 style={{ margin: '0 0 16px 0', color: '#0f0', fontFamily: '"Press Start 2P"', fontSize: '12px' }}>CHALLENGE_COMPLETE!</h3>
+                            <p style={{ margin: 0, color: '#fff', fontFamily: '"Share Tech Mono"' }}>
+                                System awarded {submission?.awardedPoints} points to your profile.
                             </p>
-                            <div style={{ marginTop: '16px' }}>
-                                <strong>Feedback:</strong>
-                                <p style={{ whiteSpace: 'pre-wrap', color: '#444' }}>{submission?.aiFeedback}</p>
+                            <div style={{ marginTop: '24px', borderTop: '1px dashed #333', paddingTop: '16px' }}>
+                                <strong style={{ color: '#888', fontSize: '12px' }}>AI_JUDGE_OUTPUT:</strong>
+                                <p style={{ whiteSpace: 'pre-wrap', color: '#0f0', fontFamily: 'monospace', fontSize: '14px', marginTop: '8px' }}>{submission?.aiFeedback}</p>
                             </div>
                         </div>
                     ) : (

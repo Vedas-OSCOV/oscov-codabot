@@ -25,7 +25,6 @@ export default async function ChallengesPage() {
     // Fetch challenges
     const challenges = await prisma.challenge.findMany({
         orderBy: { points: 'desc' }
-        // Wait, 'point' is 'points' in schema. I need to be careful.
     });
 
     // Fetch user submissions to map status
@@ -42,28 +41,26 @@ export default async function ChallengesPage() {
     const isSenior = (user?.semester || 0) > 1;
 
     // Filter challenges based on context
-    // Seniors: > 100 points (Hard/Extreme)
-    // Freshers: <= 100 points (Easy/Medium)
     const filteredChallenges = challenges.filter(c =>
         isSenior ? c.points > 100 : c.points <= 100
     );
 
-    const title = isSenior ? "Senior Arena" : "Fresher's Gauntlet";
+    const title = isSenior ? "SENIOR__ARENA" : "FRESHER_GAUNTLET";
     const subtitle = isSenior
         ? "Advanced algorithmic and architectural challenges. Strict code-only validation."
         : "Foundational problems to build your problem-solving intuition. Pseudocode allowed.";
 
     return (
-        <main style={{ minHeight: '100vh', paddingTop: '100px', background: '#FAFAFA' }}>
+        <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
             <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 24px' }}>
 
                 <div style={{ marginBottom: '40px' }}>
-                    <Link href="/dashboard" style={{ color: '#666', fontSize: '14px', marginBottom: '16px', display: 'inline-block' }}>← Back to Dashboard</Link>
-                    <h1 style={{ fontSize: '40px', fontWeight: '700', marginBottom: '16px', backgroundImage: 'linear-gradient(135deg, #1d1d1f 0%, #434344 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <Link href="/dashboard" style={{ color: '#888', fontSize: '14px', marginBottom: '16px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; DASHBOARD</Link>
+                    <h1 style={{ fontSize: '32px', marginBottom: '16px', color: '#fff', textShadow: '3px 3px #DC2626' }}>
                         {title}
                     </h1>
-                    <p style={{ fontSize: '18px', color: '#86868b', maxWidth: '600px' }}>
+                    <p style={{ fontSize: '16px', color: '#ccc', maxWidth: '600px', fontFamily: '"Share Tech Mono"' }}>
                         {subtitle}
                     </p>
                 </div>
@@ -75,39 +72,41 @@ export default async function ChallengesPage() {
                         const isPending = sub?.status === 'PENDING_AI';
 
                         return (
-                            <Link href={`/challenges/${challenge.id}`} key={challenge.id} className="glass-panel" style={{
+                            <Link href={`/challenges/${challenge.id}`} key={challenge.id} className="retro-window" style={{
                                 display: 'block',
                                 padding: '24px',
-                                transition: 'transform 0.2s',
+                                transition: 'transform 0.1s',
                                 position: 'relative',
-                                opacity: isSolved ? 0.8 : 1
+                                opacity: isSolved ? 0.6 : 1,
+                                textDecoration: 'none'
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                                     <span style={{
-                                        fontSize: '12px', fontWeight: '600', padding: '4px 12px', borderRadius: '99px',
-                                        background: 'rgba(0,0,0,0.05)', color: '#666'
+                                        fontSize: '10px', padding: '4px 8px',
+                                        background: '#fff', color: '#000', fontFamily: '"Press Start 2P"'
                                     }}>
                                         {challenge.points} PTS
                                     </span>
                                     {sub && (
                                         <span style={{
-                                            fontSize: '12px', fontWeight: 'bold',
-                                            color: isSolved ? '#166534' : isPending ? '#854d0e' : '#991b1b'
+                                            fontSize: '10px',
+                                            color: isSolved ? '#0f0' : isPending ? '#fbbf24' : '#DC2626',
+                                            fontFamily: '"Share Tech Mono"'
                                         }}>
-                                            {sub.status}
+                                            [{sub.status}]
                                         </span>
                                     )}
                                 </div>
-                                <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', lineHeight: '1.4' }}>{challenge.title}</h3>
-                                <p style={{ fontSize: '14px', color: '#666', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                                <h3 style={{ fontSize: '16px', marginBottom: '12px', lineHeight: '1.4', color: '#fff', textTransform: 'uppercase' }}>{challenge.title}</h3>
+                                <p style={{ fontSize: '14px', color: '#888', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', fontFamily: '"Share Tech Mono"' }}>
                                     {challenge.description}
                                 </p>
                             </Link>
                         );
                     }) : (
-                        <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: '#666', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
-                            <h3>No challenges found for your level.</h3>
-                            <p>Check back later for updates.</p>
+                        <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: '#666' }}>
+                            <h3>NO_DATA_FOUND.</h3>
+                            <p>CHECK_BACK_LATER.</p>
                         </div>
                     )}
                 </div>

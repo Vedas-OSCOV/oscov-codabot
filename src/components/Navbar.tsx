@@ -13,7 +13,7 @@ export default async function Navbar() {
         <div style={{ height: '80px' }}> {/* Spacer for fixed nav */}
             <nav className={styles.nav} style={{
                 background: 'rgba(0, 0, 0, 0.95)',
-                borderBottom: '4px solid #fff',
+                borderBottom: '1px solid #550000ff',
                 padding: '16px 0',
                 position: 'fixed',
                 top: 0,
