@@ -46,7 +46,7 @@ export default function LeaderboardTabs({ regularUsers: initialRegular, semester
                         cursor: 'pointer'
                     }}
                 >
-                    PROJECT_CONTRIBUTORS
+                    SENIOR_ARENA
                 </button>
                 <button
                     onClick={() => setActiveTab('sem1')}
