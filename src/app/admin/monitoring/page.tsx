@@ -1,4 +1,5 @@
 import { getMonitoringStats } from '@/app/actions/admin-insights';
+import ExportButton from '@/components/admin/ExportButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,10 @@ export default async function MonitoringPage() {
                     <h1 style={{ fontSize: '32px', margin: 0, color: '#DC2626', textShadow: '2px 2px 0px #fff' }}>DEEP_DIVE_MONITOR</h1>
                     <p style={{ margin: '8px 0 0 0', color: '#888' }}>Behavioral Analytics & System Health</p>
                 </div>
-                <a href="/admin" className="button-secondary" style={{ border: '1px solid #666', padding: '8px 16px', textDecoration: 'none', color: '#ccc' }}>&lt; RETURN_ROOT</a>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <ExportButton />
+                    <a href="/admin" className="button-secondary" style={{ border: '1px solid #666', padding: '8px 16px', textDecoration: 'none', color: '#ccc', display: 'flex', alignItems: 'center' }}>&lt; RETURN</a>
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))', gap: '30px' }}>
