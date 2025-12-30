@@ -16,6 +16,16 @@ export async function submitChallenge(challengeId: string, content: string) {
         throw new Error("Unauthorized");
     }
 
+    // Check Ban Status
+    const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { isBanned: true, semester: true }
+    });
+
+    if (dbUser?.isBanned) {
+        return { success: false, message: "Your account has been suspended due to policy violations. Contact admin." };
+    }
+
     if (!process.env.OPENAI_API_KEY) {
         throw new Error("OpenAI API Key missing");
     }

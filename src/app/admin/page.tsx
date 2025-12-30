@@ -3,10 +3,30 @@
 import { useEffect, useState } from 'react';
 import styles from './admin-page.module.css';
 import { getAdminStats } from '@/app/actions/admin-stats';
+import { toggleBanUser } from '@/app/actions/user-management';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const handleBan = async (userId: string) => {
+        if (!confirm("Are you sure you want to ban/unban this user?")) return;
+
+        try {
+            const res = await toggleBanUser(userId);
+            if (res.success) {
+                // Optimistic update
+                setStats((prev: any) => ({
+                    ...prev,
+                    userStats: prev.userStats.map((u: any) =>
+                        u.id === userId ? { ...u, isBanned: res.isBanned } : u
+                    )
+                }));
+            }
+        } catch (e) {
+            alert("Failed to update ban status");
+        }
+    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -116,15 +136,17 @@ export default function AdminDashboard() {
                                 <th style={{ padding: '8px', color: '#DC2626' }}>TOTAL_SUBMITS</th>
                                 <th style={{ padding: '8px', color: '#DC2626' }}>LAST_ACTIVE</th>
                                 <th style={{ padding: '8px', color: '#DC2626' }}>RISK_SCORE</th>
+                                <th style={{ padding: '8px', color: '#DC2626' }}>ACTION</th>
                             </tr>
                         </thead>
                         <tbody>
                             {stats?.userStats?.map((u: any) => (
-                                <tr key={u.id} style={{ borderBottom: '1px solid #222' }}>
+                                <tr key={u.id} style={{ borderBottom: '1px solid #222', opacity: u.isBanned ? 0.5 : 1 }}>
                                     <td style={{ padding: '8px' }}>
-                                        <a href={`/admin/submissions?userId=${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }} title="View Submissions">
-                                            {u.image && <img src={u.image} style={{ width: '20px', height: '20px', borderRadius: '50%' }} />}
-                                            <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>{u.name || u.email}</span>
+                                        <a href={`/admin/submissions?userId=${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: u.isBanned ? '#ef4444' : 'inherit' }} title="View Submissions">
+                                            {u.image && <img src={u.image} style={{ width: '20px', height: '20px', borderRadius: '50%', filter: u.isBanned ? 'grayscale(100%)' : 'none' }} />}
+                                            <span style={{ textDecoration: u.isBanned ? 'line-through' : 'underline', textDecorationStyle: 'dotted' }}>{u.name || u.email}</span>
+                                            {u.isBanned && <span style={{ fontSize: '10px', background: '#DC2626', color: 'white', padding: '2px 4px', borderRadius: '2px' }}>BANNED</span>}
                                         </a>
                                     </td>
                                     <td style={{ padding: '8px' }}>{u.totalSubmissions}</td>
@@ -136,6 +158,21 @@ export default function AdminDashboard() {
                                         }}>
                                             {u.riskScore}%
                                         </span>
+                                    </td>
+                                    <td style={{ padding: '8px' }}>
+                                        <button
+                                            onClick={() => handleBan(u.id)}
+                                            style={{
+                                                background: 'transparent',
+                                                border: '1px solid #333',
+                                                color: u.isBanned ? '#22c55e' : '#DC2626',
+                                                cursor: 'pointer',
+                                                fontSize: '10px',
+                                                padding: '4px 8px'
+                                            }}
+                                        >
+                                            {u.isBanned ? 'UNBAN' : 'BAN'}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

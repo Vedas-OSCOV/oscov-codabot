@@ -70,6 +70,7 @@ model User {
   username String? // Keeping for backward compat if needed, but 'name' is primary
   githubId String? // Optional: mapped from Account if needed manually
   semester Int? // 1-8, null means not yet onboarded
+  isBanned Boolean @default(false)
 }
 
 model VerificationToken {

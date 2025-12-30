@@ -47,7 +47,8 @@ export async function getAdminStats() {
             image: u.image,
             totalSubmissions: total,
             lastActive: u.submissions[0]?.lastSubmittedAt || null,
-            riskScore: total > 0 ? Math.round((rejected / total) * 100) : 0
+            riskScore: total > 0 ? Math.round((rejected / total) * 100) : 0,
+            isBanned: u.isBanned
         };
     }));
 
