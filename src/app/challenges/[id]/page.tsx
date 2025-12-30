@@ -36,6 +36,13 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
         }
     });
 
+    // Fetch globally latest submission for rate limiting across ALL challenges
+    const globalLatestSubmission = await prisma.submission.findFirst({
+        where: { userId: session.user.id },
+        orderBy: { lastSubmittedAt: 'desc' },
+        select: { lastSubmittedAt: true, status: true }
+    });
+
     const isSolved = submission?.status === 'APPROVED';
 
     return (
@@ -83,7 +90,11 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
                             </div>
                         </div>
                     ) : (
-                        <ChallengeSubmissionForm challengeId={challenge.id} previousSubmission={submission} />
+                        <ChallengeSubmissionForm
+                            challengeId={challenge.id}
+                            previousSubmission={submission}
+                            globalLastSubmission={globalLatestSubmission}
+                        />
                     )}
                 </div>
 

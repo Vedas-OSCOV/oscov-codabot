@@ -29,17 +29,23 @@ export async function submitChallenge(challengeId: string, content: string) {
         return { success: false, message: "You have already completed this challenge successfully. Re-submissions are not allowed for approved challenges." };
     }
 
-    // Rate limiting: Check if user is trying to resubmit too soon
-    if (existing && existing.lastSubmittedAt) {
+    // Global Rate limiting: Check if user has submitted ANY challenge too recently AND failed
+    const lastSubmission = await prisma.submission.findFirst({
+        where: { userId: session.user.id },
+        orderBy: { lastSubmittedAt: 'desc' },
+        select: { lastSubmittedAt: true, status: true }
+    });
+
+    if (lastSubmission && lastSubmission.lastSubmittedAt && lastSubmission.status === 'REJECTED') {
         const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const timeSinceLastSubmit = Date.now() - existing.lastSubmittedAt.getTime();
+        const timeSinceLastSubmit = Date.now() - lastSubmission.lastSubmittedAt.getTime();
 
         if (timeSinceLastSubmit < RATE_LIMIT_MS) {
             const remainingMs = RATE_LIMIT_MS - timeSinceLastSubmit;
             const remainingMinutes = Math.ceil(remainingMs / 60000);
             return {
                 success: false,
-                message: `Rate limit: Please wait ${remainingMinutes} minute(s) before resubmitting.`,
+                message: `Rate limit: Please wait ${remainingMinutes} minute(s) before submitting any challenge.`,
                 rateLimitMs: remainingMs
             };
         }

@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react';
 import { submitChallenge } from '@/app/actions/submit-challenge';
 import Editor from '@monaco-editor/react';
 
-export default function ChallengeSubmissionForm({ challengeId, previousSubmission }: { challengeId: string, previousSubmission: any }) {
+export default function ChallengeSubmissionForm({
+    challengeId,
+    previousSubmission,
+    globalLastSubmission
+}: {
+    challengeId: string,
+    previousSubmission: any,
+    globalLastSubmission?: { lastSubmittedAt: Date | null, status: string } | null
+}) {
     const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number } | null>(
         previousSubmission ? { success: previousSubmission.status === 'APPROVED', status: previousSubmission.status, feedback: previousSubmission.aiFeedback, points: previousSubmission.aiScore } : null
     );
@@ -12,11 +20,16 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
     const [remainingTime, setRemainingTime] = useState<number | null>(null);
 
-    // Calculate initial remaining time from previousSubmission
+    // Calculate initial remaining time from Global Rate Limit (only if blocked)
     useEffect(() => {
-        if (previousSubmission?.lastSubmittedAt && previousSubmission.status !== 'APPROVED') {
+        // use global submission if available and REJECTED
+        const lastSubmitDate = globalLastSubmission?.lastSubmittedAt || previousSubmission?.lastSubmittedAt;
+        const lastStatus = globalLastSubmission?.status || previousSubmission?.status;
+
+        // ONLY rate limit if the last attempt was REJECTED
+        if (lastSubmitDate && lastStatus === 'REJECTED') {
             const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
-            const lastSubmitTime = new Date(previousSubmission.lastSubmittedAt).getTime();
+            const lastSubmitTime = new Date(lastSubmitDate).getTime();
             const elapsed = Date.now() - lastSubmitTime;
             const remaining = RATE_LIMIT_MS - elapsed;
 
@@ -24,7 +37,7 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                 setRemainingTime(remaining);
             }
         }
-    }, [previousSubmission]);
+    }, [globalLastSubmission, previousSubmission]);
 
     // Countdown timer
     useEffect(() => {
@@ -179,7 +192,7 @@ export default function ChallengeSubmissionForm({ challengeId, previousSubmissio
                 }}
             >
                 {pending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
-                {pending ? 'Grading Solution...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
+                {pending ? 'Processing...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
                 <style jsx>{`
                     @keyframes spin {
                         to { transform: rotate(360deg); }
