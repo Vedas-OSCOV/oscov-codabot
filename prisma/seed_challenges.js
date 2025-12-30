@@ -213,10 +213,31 @@ const easyChallenges = [
     { title: "Queue using Stacks", description: "Implement a queue using stacks.", points: 40 },
     { title: "Stack using Queues", description: "Implement a stack using queues.", points: 40 },
     { title: "First Unique Character", description: "Find the first non-repeating character in a string.", points: 30 },
-    { title: "Longest Palindrome", description: "Find the length of the longest palindrome that can be built with the given letters.", points: 30 }
+    // ... (previous list)
+    { title: "Longest Palindrome", description: "Find the length of the longest palindrome that can be built with the given letters.", points: 30 },
+    // More Easy/Medium Challenges
+    { title: "Roman to Integer", description: "Convert a Roman numeral to an integer.", points: 30 },
+    { title: "Length of Last Word", description: "Return the length of the last word in the string.", points: 20 },
+    { title: "Search Insert Position", description: "Return the index where the target would be if it were inserted in order.", points: 25 },
+    { title: "Remove Element", description: "Remove all occurrences of val in nums in-place.", points: 25 },
+    { title: "Implement strStr()", description: "Return the index of the first occurrence of needle in haystack.", points: 30 },
+    { title: "Add Binary", description: "Given two binary strings, return their sum (also a binary string).", points: 35 },
+    { title: "My Sqrt(x)", description: "Compute and return the square root of x.", points: 30 },
+    { title: "Remove Linked List Elements", description: "Remove all elements from a linked list of integers that have value val.", points: 30 },
+    { title: "Intersection of Two Linked Lists", description: "Find the node at which two singly linked lists intersect.", points: 35 },
+    { title: "Missing Number", description: "Given an array `nums` containing `n` distinct numbers in the range `[0, n]`, return the only number in the range that is missing from the array.", points: 30 },
+    { title: "Move Zeroes", description: "Given an integer array `nums`, move all `0`'s to the end of it while maintaining the relative order of the non-zero elements.", points: 30 },
+    { title: "Word Pattern", description: "Given a `pattern` and a string `s`, find if `s` follows the same pattern.", points: 30 },
+    { title: "Nim Game", description: "Determine if you can win the Nim Game given n stones.", points: 25 },
+    { title: "Reverse Vowels of a String", description: "Reverse only the vowels of a string.", points: 25 },
+    { title: "First Unique Character in a String", description: "Find the first non-repeating character in a string and return its index.", points: 30 },
+    { title: "Find the Difference", description: "Find the letter that was added to string t.", points: 25 },
+    { title: "Is Subsequence", description: "Check if s is a subsequence of t.", points: 25 },
+    { title: "Sum of Left Leaves", description: "Find the sum of all left leaves in a given binary tree.", points: 35 },
+    { title: "Third Maximum Number", description: "Return the third maximum number in this array.", points: 30 },
+    { title: "Add Strings", description: "Given two non-negative integers representing strings, return the sum of num1 and num2.", points: 30 }
 ];
 
-// Helper to generate more variations to reach goal if needed
 const theoreticalTopics = [
     "P vs NP", "Halting Problem", "Godel's Incompleteness", "Turing Completeness", "Kolmogorov Complexity",
     "Lambda Calculus", "Automata Theory", "Chomsky Hierarchy", "Information Theory", "Category Theory"
@@ -236,20 +257,25 @@ const allChallenges = [...challenges, ...easyChallenges, ...generateTheoreticalQ
 async function main() {
     console.log(`Start seeding ${allChallenges.length} challenges...`);
 
-    // Optional: Clear or Upsert, but here we just create if not exists or allow duplicates?
-    // Let's iterate and create.
-
     for (const challenge of allChallenges) {
-        // Simple check to avoid crazy dups if run multiple times, or just create.
-        // For now, simple create.
-        await prisma.challenge.create({
-            data: {
-                title: challenge.title,
-                description: challenge.description,
-                points: challenge.points,
-                difficulty: "EXTREME"
-            }
+        // Check for duplicates by title
+        const existing = await prisma.challenge.findFirst({
+            where: { title: challenge.title }
         });
+
+        if (!existing) {
+            await prisma.challenge.create({
+                data: {
+                    title: challenge.title,
+                    description: challenge.description,
+                    points: challenge.points,
+                    difficulty: challenge.points > 100 ? "EXTREME" : "MEDIUM"
+                }
+            });
+            console.log(`Created: ${challenge.title}`);
+        } else {
+            console.log(`Skipped (Exists): ${challenge.title}`);
+        }
     }
 
     console.log(`Seeding finished.`);
