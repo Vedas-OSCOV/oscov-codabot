@@ -68,6 +68,7 @@ model User {
 
   username String? // Keeping for backward compat if needed, but 'name' is primary
   githubId String? // Optional: mapped from Account if needed manually
+  semester Int? // 1-8, null means not yet onboarded
 }
 
 model VerificationToken {
@@ -93,14 +94,35 @@ model Issue {
   @@unique([repoUrl, issueNumber])
 }
 
+model Challenge {
+  id          String       @id @default(cuid())
+  title       String
+  description String       @db.Text
+  difficulty  String       @default("HARD") // Just for display
+  points      Int          @default(100)
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Submission {
-  id            String           @id @default(cuid())
-  userId        String
-  user          User             @relation(fields: [userId], references: [id])
-  issueId       String
-  issue         Issue            @relation(fields: [issueId], references: [id])
-  prUrl         String
-  aiFeedback    String?
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Standard Issues
+  issueId String?
+  issue   Issue?  @relation(fields: [issueId], references: [id])
+
+  // Semester 1 Challenges
+  challengeId String?
+  challenge   Challenge? @relation(fields: [challengeId], references: [id])
+
+  prUrl   String? // Optional for challenges (text/code submission)
+  content String? @db.Text // For code/text answers
+
+  aiFeedback    String?          @db.Text
   aiScore       Int?
   status        SubmissionStatus @default(PENDING_AI)
   isMerged      Boolean          @default(false)
@@ -108,5 +130,9 @@ model Submission {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
+  // Unique constraint for Users per Issue OR Challenge?
+  // We can't really enforce "either issueId or challengeId" easily with unique index in standard Prisma without some complexity
+  // But we can keep unique per issue and unique per challenge separately via composite unique constraints if we want 1 submission per problem.
   @@unique([userId, issueId])
+  @@unique([userId, challengeId])
 }
