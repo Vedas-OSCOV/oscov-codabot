@@ -4,8 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { fetchPRDetails, fetchPRDiff } from "@/lib/github";
-import { analyzePRDiff } from "@/lib/gemini";
+import { analyzePRDiff } from "@/lib/ai";
 import { revalidatePath } from "next/cache";
+
 
 export async function submitSolution(issueId: string, formData: FormData) {
     const session = await getServerSession(authOptions);
