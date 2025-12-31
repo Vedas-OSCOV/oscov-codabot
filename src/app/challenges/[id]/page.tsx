@@ -46,6 +46,15 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
 
     const isSolved = submission?.status === 'APPROVED';
 
+    let rateLimitRemainingMs = null;
+    if (globalLatestSubmission && globalLatestSubmission.status === 'REJECTED' && globalLatestSubmission.lastSubmittedAt) {
+        const RATE_LIMIT_MS = 5 * 60 * 1000;
+        const timeSinceLastSubmit = Date.now() - globalLatestSubmission.lastSubmittedAt.getTime();
+        if (timeSinceLastSubmit < RATE_LIMIT_MS) {
+            rateLimitRemainingMs = RATE_LIMIT_MS - timeSinceLastSubmit;
+        }
+    }
+
     return (
         <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
@@ -101,6 +110,7 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
                                 lastSubmittedAt: globalLatestSubmission.lastSubmittedAt?.toISOString() || null,
                                 status: globalLatestSubmission.status
                             } : null}
+                            initialRemainingTime={rateLimitRemainingMs}
                         />
                     )}
                 </div>

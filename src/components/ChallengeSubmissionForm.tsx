@@ -8,11 +8,13 @@ import Editor from '@monaco-editor/react';
 export default function ChallengeSubmissionForm({
     challengeId,
     previousSubmission,
-    globalLastSubmission
+    globalLastSubmission,
+    initialRemainingTime = null
 }: {
     challengeId: string,
     previousSubmission: any,
-    globalLastSubmission?: { lastSubmittedAt: string | null, status: string } | null
+    globalLastSubmission?: { lastSubmittedAt: string | null, status: string } | null,
+    initialRemainingTime?: number | null
 }) {
     const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number; remainingAttempts?: number; locked?: boolean } | null>(
         previousSubmission ? {
@@ -26,50 +28,10 @@ export default function ChallengeSubmissionForm({
     );
 
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
-    const [remainingTime, setRemainingTime] = useState<number | null>(null);
+    const [remainingTime, setRemainingTime] = useState<number | null>(initialRemainingTime);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
     const { data: session } = useSession();
-
-    // Calculate initial remaining time from Global Rate Limit (only if blocked)
-    useEffect(() => {
-        // use global submission if available and REJECTED
-        const lastSubmitDate = globalLastSubmission?.lastSubmittedAt || previousSubmission?.lastSubmittedAt;
-        const lastStatus = globalLastSubmission?.status || previousSubmission?.status;
-
-        // ONLY rate limit if the last attempt was REJECTED
-        if (lastSubmitDate && lastStatus === 'REJECTED') {
-            const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
-
-            // Ensure we're working with UTC timestamps by converting to milliseconds since epoch
-            const lastSubmitTime = typeof lastSubmitDate === 'string'
-                ? new Date(lastSubmitDate).getTime()
-                : lastSubmitDate instanceof Date
-                    ? lastSubmitDate.getTime()
-                    : new Date(lastSubmitDate).getTime();
-
-            const now = Date.now(); // Already UTC timestamp
-            const elapsed = now - lastSubmitTime;
-            const remaining = RATE_LIMIT_MS - elapsed;
-
-            console.log('Rate Limit Debug:', {
-                lastSubmitDate,
-                lastSubmitDateType: typeof lastSubmitDate,
-                lastSubmitTime,
-                lastSubmitTimeISO: new Date(lastSubmitTime).toISOString(),
-                now,
-                nowISO: new Date(now).toISOString(),
-                elapsed: Math.floor(elapsed / 1000) + 's',
-                remaining: Math.floor(remaining / 1000) + 's'
-            });
-
-            if (remaining > 0) {
-                setRemainingTime(remaining);
-            } else {
-                setRemainingTime(null);
-            }
-        }
-    }, [globalLastSubmission, previousSubmission]);
 
     // Countdown timer
     useEffect(() => {
