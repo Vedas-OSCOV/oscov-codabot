@@ -14,7 +14,7 @@ export default function ChallengeSubmissionForm({
     previousSubmission: any,
     globalLastSubmission?: { lastSubmittedAt: Date | null, status: string } | null
 }) {
-    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number; remainingAttempts?: number; locked?: boolean } | null>(
+    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number; remainingAttempts?: number; locked?: boolean; remainingQuota?: number; quotaExceeded?: boolean } | null>(
         previousSubmission ? {
             success: previousSubmission.status === 'APPROVED',
             status: previousSubmission.status,
@@ -224,7 +224,17 @@ export default function ChallengeSubmissionForm({
 
     return (
         <form onSubmit={handleSubmitClick}>
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    color: '#666',
+                    background: '#1a1a1a',
+                    padding: '8px 12px',
+                    border: '1px solid #333'
+                }}>
+                    DAILY: {result?.remainingQuota !== undefined ? `${10 - result.remainingQuota}/10` : '?/10'}
+                </span>
                 <span style={{
                     fontFamily: '"Press Start 2P"',
                     fontSize: '10px',
@@ -252,6 +262,22 @@ export default function ChallengeSubmissionForm({
 
             {result?.message && !result.success && !result.status && (
                 <div style={{ color: 'red', marginBottom: '16px' }}>{result.message}</div>
+            )}
+
+            {/* Daily Quota Warning */}
+            {result?.remainingQuota !== undefined && result.remainingQuota <= 3 && result.remainingQuota > 0 && (
+                <div style={{
+                    padding: '12px',
+                    background: '#fef3c7',
+                    border: '2px solid #f59e0b',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    color: '#92400e',
+                    fontFamily: '"Share Tech Mono"',
+                    fontSize: '12px'
+                }}>
+                    ⚠️ Only {result.remainingQuota} submission(s) remaining today!
+                </div>
             )}
 
             {/* Validation Error */}

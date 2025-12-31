@@ -49,6 +49,28 @@ export async function submitChallenge(challengeId: string, content: string) {
         }
     }
 
+    // Daily Quota Check: Limit to 10 submissions per 24 hours
+    const DAILY_QUOTA = 15;
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const submissionsLast24h = await prisma.submission.count({
+        where: {
+            userId: session.user.id,
+            lastSubmittedAt: {
+                gte: twentyFourHoursAgo
+            }
+        }
+    });
+
+    if (submissionsLast24h >= DAILY_QUOTA) {
+        return {
+            success: false,
+            message: `Daily quota exceeded. You have used all ${DAILY_QUOTA} submissions for today. Please try again in 24 hours.`,
+            quotaExceeded: true,
+            remainingQuota: 0
+        };
+    }
+
     // Global Rate limiting: Check if user has submitted ANY challenge too recently AND failed
     const lastSubmission = await prisma.submission.findFirst({
         where: { userId: session.user.id, lastSubmittedAt: { not: null } },
@@ -66,7 +88,8 @@ export async function submitChallenge(challengeId: string, content: string) {
             return {
                 success: false,
                 message: `Rate limit: Please wait ${remainingMinutes} minute(s) before submitting any challenge.`,
-                rateLimitMs: remainingMs
+                rateLimitMs: remainingMs,
+                remainingQuota: DAILY_QUOTA - submissionsLast24h
             };
         }
     }
@@ -225,12 +248,16 @@ export async function submitChallenge(challengeId: string, content: string) {
     const currentAttempts = existing ? existing.attemptCount + 1 : 1;
     const remainingAttempts = Math.max(0, 3 - currentAttempts);
 
+    // Calculate remaining quota
+    const remainingQuota = DAILY_QUOTA - (submissionsLast24h + 1); // +1 for current submission
+
     return {
         success: true,
         status,
         feedback: aiResult.feedback,
         points: score,
         lastSubmittedAt: new Date(),
-        remainingAttempts
+        remainingAttempts,
+        remainingQuota
     };
 }
