@@ -99,8 +99,7 @@ export async function submitChallenge(challengeId: string, content: string) {
     "${content}"
     `;
 
-    // God Mode for 500+ points
-    const isGodMode = challenge.points > 500;
+    const isGodMode = challenge.points >= 180 && isSenior;
 
     let strictInstructions = "";
 
