@@ -15,7 +15,7 @@ export default function Home() {
           The Vedas-OSCOV Coding Marathon. Join the elite, solve real open-source issues, and prove your mastery.
         </p>
         <div className={styles.ctas}>
-          <Link href="/issues" className="button-primary">
+          <Link href="/challenges" className="button-primary">
             Start Coding
           </Link>
           <Link href="/leaderboard" className={styles.secondaryLink}>
