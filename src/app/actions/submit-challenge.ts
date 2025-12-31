@@ -19,11 +19,18 @@ export async function submitChallenge(challengeId: string, content: string) {
     // Check Ban Status
     const dbUser = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { isBanned: true, semester: true }
+        select: { isBanned: true, semester: true, failedAttempts: true }
     });
 
-    if (dbUser?.isBanned) {
-        return { success: false, message: "Your account has been suspended due to policy violations. Contact admin." };
+    if (dbUser?.isBanned || (dbUser?.failedAttempts ?? 0) >= 6) {
+        // Double check if we need to explicitly set banned if not already (safeguard)
+        if (!dbUser?.isBanned) {
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { isBanned: true }
+            });
+        }
+        return { success: false, message: "Your account has been suspended due to policy violations (too many failed attempts). Contact admin." };
     }
 
     if (!process.env.OPENAI_API_KEY) {
@@ -89,16 +96,17 @@ Code:
 Instructions:
 1.Verify if EXECUTABLE CODE. REJECT pseudocode.
 2.Check logic, edge cases, efficiency.
-3.Must be functional.
+3.Must be functional. be extremely harsh
 ${isSenior ? '4.Incomplete/Syntax/Logic errors->REJECT. Be EXTREMELY HARSH (Senior Level).' : '4.Pseudocode allowed if logically perfect. Be strict but fair.'}
 5.PASS (APPROVED) or FAIL (REJECTED).
 6.If Approved, suggest score 20-${challenge.points}.
+7. You are to be etremely harsh critic and can't be lenient.
 Return JSON:{"status":"APPROVED"|"REJECTED","score":number,"feedback":"Short feedback explaining why."}`;
 
     let aiResult;
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o",
             messages: [
                 { role: "system", content: "You are a code judge. Return JSON only." },
                 { role: "user", content: prompt }
@@ -121,8 +129,27 @@ Return JSON:{"status":"APPROVED"|"REJECTED","score":number,"feedback":"Short fee
     if (status === 'APPROVED') {
         await prisma.user.update({
             where: { id: session.user.id },
-            data: { score: { increment: score } }
+            data: {
+                score: { increment: score },
+                failedAttempts: 0 // Reset on success
+            }
         });
+    } else {
+        // Increment failed attempts
+        const updatedUser = await prisma.user.update({
+            where: { id: session.user.id },
+            data: { failedAttempts: { increment: 1 } },
+            select: { failedAttempts: true }
+        });
+
+        if (updatedUser.failedAttempts >= 6) {
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { isBanned: true }
+            });
+            // We can return here or let it fall through, but the result is REJECTED anyway.
+            // The next time they try, they will be blocked at the start.
+        }
     }
 
     if (existing) {
