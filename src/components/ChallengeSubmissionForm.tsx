@@ -117,6 +117,29 @@ export default function ChallengeSubmissionForm({
         );
     }
 
+    function handleEditorDidMount(editor: any, monaco: any) {
+        // Disable pasting via DOM events (Capture phase)
+        const container = editor.getContainerDomNode();
+        container.addEventListener('paste', (e: any) => {
+            e.preventDefault();
+            e.stopPropagation();
+            alert("Pasting is not allowed in this examination environment.");
+        }, true);
+
+        // Disable pasting via Keyboard Shortcuts (Ctrl+V, Cmd+V, Shift+Insert)
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
+            alert("Pasting is not allowed in this examination environment.");
+        });
+        editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Insert, () => {
+            alert("Pasting is not allowed in this examination environment.");
+        });
+
+        // Disable Context Menu (Redundant with options, but good for safety)
+        editor.onContextMenu((e: any) => {
+            e.event.preventDefault();
+        });
+    }
+
     return (
         <form action={handleSubmit}>
             {previousSubmission && previousSubmission.status === 'REJECTED' && (
@@ -179,11 +202,13 @@ export default function ChallengeSubmissionForm({
                     theme="light"
                     value={code}
                     onChange={(value) => setCode(value || "")}
+                    onMount={handleEditorDidMount}
                     options={{
                         minimap: { enabled: false },
                         fontSize: 14,
                         scrollBeyondLastLine: false,
-                        automaticLayout: true
+                        automaticLayout: true,
+                        contextmenu: false // Disable context menu to further discourage pasting via GUI
                     }}
                 />
             </div>
