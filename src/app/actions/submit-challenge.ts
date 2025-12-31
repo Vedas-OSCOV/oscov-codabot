@@ -99,21 +99,41 @@ export async function submitChallenge(challengeId: string, content: string) {
     "${content}"
     `;
 
-    // Strict Mode for Semesters 2-8
-    const strictInstructions = isSenior ? `
-    Your task:
-    1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
-    2. Check for logic, edge cases, and efficiency.
-    3. The solution must be fully functional code (Python, JS, C++, etc).
-    4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
-    5. Be extremely harsh. This is a senior level challenge.
-    6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
-    ` : `
-    Your task:
-    1. Verify if the submission is correct (Code or Pseudocode allowed).
-    2. If pseudocode, it must be logically perfect.
-    3. Be strict but fair for beginners.
-    `;
+    // God Mode for 500+ points
+    const isGodMode = challenge.points > 500;
+
+    let strictInstructions = "";
+
+    if (isGodMode) {
+        strictInstructions = `
+        Your task:
+        1. CRITICAL: This challenge is worth >500 points. IT REQUIRES PERFECTION.
+        2. NO PARTIAL CREDIT. Any flaw, no matter how small, results in REJECTION (0 points).
+        3. STRICTLY PROHIBIT Pseudocode. REJECT immediately.
+        4. CHECK FOR OPTIMALITY. If the solution is O(n^2) when O(n) is possible -> REJECT.
+        5. CHECK FOR CLEAN CODE. Poor variable naming, lack of comments, or messy structure -> REJECT.
+        6. SECURITY: Check for any potential security vulnerabilities -> REJECT if found.
+        7. The user is likely an advanced engineer or using advanced AI. Judge with EXTREME HARSHNESS. DO nOT HOLD BACK AT ALL> BE EXTREMELY CYNICAL AND HARSH> YOUR TASK IS TO MAKE SURE THE CODE IS PERFECT AND THE SUBMISSION DOESNT GET ACCEPTED.
+        8. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT.
+        `;
+    } else if (isSenior) {
+        strictInstructions = `
+        Your task:
+        1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
+        2. Check for logic, edge cases, and efficiency.
+        3. The solution must be fully functional code (Python, JS, C++, etc).
+        4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
+        5. Be extremely harsh. This is a senior level challenge.
+        6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
+        `;
+    } else {
+        strictInstructions = `
+        Your task:
+        1. Verify if the submission is correct (Code or Pseudocode allowed).
+        2. If pseudocode, it must be logically perfect.
+        3. Be strict but fair for beginners.
+        `;
+    }
 
     const prompt = `
     You are a strictly academic Computer Science judge.
