@@ -9,18 +9,34 @@ export async function GET() {
             prisma.user.findMany({
                 where: { OR: [{ semester: { not: 1 } }, { semester: null }] },
                 orderBy: { score: 'desc' },
-                take: 50
+                take: 50,
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                    score: true,
+                    semester: true,
+                    lastRank: true
+                }
             }),
             prisma.user.findMany({
                 where: { semester: 1 },
                 orderBy: { score: 'desc' },
-                take: 50
+                take: 50,
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true,
+                    score: true,
+                    semester: true,
+                    lastRank: true
+                }
             }),
             prisma.submission.count()
         ]);
 
-        // "Active Users" simulated for the event vibe (42-120 range)
-        // In a real app, we'd track websocket connections or last_seen
         const activeUsers = Math.floor(Math.random() * (120 - 42 + 1)) + 42;
 
         return NextResponse.json({
