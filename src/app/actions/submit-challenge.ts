@@ -124,6 +124,8 @@ export async function submitChallenge(challengeId: string, content: string) {
         4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
         5. Be extremely harsh. This is a senior level challenge.
         6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
+        7. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT.
+        8. Your goal is to try and figure out a way to reject the silution anyhow
         `;
     } else {
         strictInstructions = `
@@ -131,6 +133,8 @@ export async function submitChallenge(challengeId: string, content: string) {
         1. Verify if the submission is correct (Code or Pseudocode allowed).
         2. If pseudocode, it must be logically perfect.
         3. Be strict but fair for beginners.
+        4. Your goal is to try and figure out a way to reject the silution anyhow
+        5. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT. this is a junir level problem, but be strict.
         `;
     }
 

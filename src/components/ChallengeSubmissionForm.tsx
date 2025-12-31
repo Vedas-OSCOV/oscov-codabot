@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { submitChallenge } from '@/app/actions/submit-challenge';
+import { useSession } from 'next-auth/react';
 import Editor from '@monaco-editor/react';
 
 export default function ChallengeSubmissionForm({
@@ -26,6 +27,9 @@ export default function ChallengeSubmissionForm({
 
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
     const [remainingTime, setRemainingTime] = useState<number | null>(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const { data: session } = useSession();
 
     // Calculate initial remaining time from Global Rate Limit (only if blocked)
     useEffect(() => {
@@ -76,8 +80,57 @@ export default function ChallengeSubmissionForm({
 
     const [isPending, startTransition] = useTransition();
 
-    async function handleSubmit(formData: FormData) {
-        // We use the state 'code' instead of getting it from formData's textarea
+    function validateSubmission(content: string): string | null {
+        // 1. Minimum length check
+        if (content.trim().length < 50) {
+            return "Submission too short. Please write at least 50 characters of actual code.";
+        }
+
+        // 2. Check if it's just template/placeholder
+        const templatePhrases = [
+            "write your solution here",
+            "your code",
+            "// todo",
+            "function solution()"
+        ];
+        const lowerContent = content.toLowerCase();
+        const hasOnlyTemplate = templatePhrases.every(phrase => lowerContent.includes(phrase));
+        if (hasOnlyTemplate && content.length < 100) {
+            return "Please replace the template with your actual solution.";
+        }
+
+        // 3. Pseudocode warning for seniors
+        const userSemester = (session?.user as any)?.semester || 0;
+        const isSenior = userSemester > 1;
+        if (isSenior) {
+            const pseudocodeKeywords = ['step 1', 'step 2', 'first', 'then', 'finally', 'next'];
+            const hasPseudocode = pseudocodeKeywords.filter(kw => lowerContent.includes(kw)).length >= 2;
+            const hasCodeKeywords = /function|def|class|const|let|var|return|import|for|while/i.test(content);
+
+            if (hasPseudocode && !hasCodeKeywords) {
+                return "Warning: Your submission looks like pseudocode. Seniors must submit executable code (Python, JS, C++, etc).";
+            }
+        }
+
+        return null; // Valid
+    }
+
+    function handleSubmitClick(e: React.FormEvent) {
+        e.preventDefault();
+
+        // Pre-validation
+        const error = validateSubmission(code);
+        if (error) {
+            setValidationError(error);
+            return;
+        }
+
+        setValidationError(null);
+        setShowConfirmDialog(true);
+    }
+
+    async function confirmSubmit() {
+        setShowConfirmDialog(false);
         const content = code;
 
         startTransition(async () => {
@@ -170,7 +223,7 @@ export default function ChallengeSubmissionForm({
     }
 
     return (
-        <form action={handleSubmit}>
+        <form onSubmit={handleSubmitClick}>
             <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
                 <span style={{
                     fontFamily: '"Press Start 2P"',
@@ -199,6 +252,85 @@ export default function ChallengeSubmissionForm({
 
             {result?.message && !result.success && !result.status && (
                 <div style={{ color: 'red', marginBottom: '16px' }}>{result.message}</div>
+            )}
+
+            {/* Validation Error */}
+            {validationError && (
+                <div style={{
+                    padding: '16px',
+                    background: '#fef2f2',
+                    border: '2px solid #f87171',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    color: '#991b1b',
+                    fontFamily: '"Share Tech Mono"'
+                }}>
+                    <strong>❌ Validation Failed:</strong> {validationError}
+                </div>
+            )}
+
+            {/* Confirmation Dialog */}
+            {showConfirmDialog && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div style={{
+                        background: '#1a1a1a',
+                        border: '4px solid #DC2626',
+                        padding: '32px',
+                        borderRadius: '0',
+                        maxWidth: '500px',
+                        fontFamily: '"Press Start 2P"'
+                    }}>
+                        <h3 style={{ color: '#DC2626', fontSize: '14px', marginBottom: '16px' }}>CONFIRM_SUBMISSION</h3>
+                        <p style={{ color: '#ccc', fontSize: '10px', lineHeight: '1.8', marginBottom: '24px', fontFamily: '"Share Tech Mono"' }}>
+                            You have <strong style={{ color: '#0f0' }}>{remainingAttemptsCount} attempt(s)</strong> remaining.
+                            <br /><br />
+                            Once submitted, this will be graded by AI and consume API resources. Are you sure your solution is ready?
+                        </p>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                            <button
+                                onClick={() => setShowConfirmDialog(false)}
+                                style={{
+                                    flex: 1,
+                                    background: '#333',
+                                    color: '#fff',
+                                    border: '2px solid #555',
+                                    padding: '12px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer',
+                                    fontFamily: '"Press Start 2P"'
+                                }}
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                onClick={confirmSubmit}
+                                style={{
+                                    flex: 1,
+                                    background: '#DC2626',
+                                    color: '#fff',
+                                    border: '2px solid #fff',
+                                    padding: '12px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer',
+                                    fontFamily: '"Press Start 2P"'
+                                }}
+                            >
+                                YES_SUBMIT
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Rate Limit Warning */}
