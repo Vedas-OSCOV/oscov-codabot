@@ -93,18 +93,20 @@ export default function LeaderboardTabs({ regularUsers: initialRegular, semester
                                         )}
                                         <span style={{ color: 'white', fontWeight: 'bold' }}>{user.name || 'ANONYMOUS'}</span>
                                         {user.semester === 1 && activeTab === 'sem1' && <span style={{ fontSize: '10px', background: '#333', padding: '2px 4px', border: '1px solid #555' }}>LVL 1</span>}
-                                        {/* Rank Change Indicator */}
+                                        {/* Rank Change Indicator - Only show if user belongs to this tab */}
                                         {user.lastRank && (
-                                            <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 'bold' }}>
-                                                {user.lastRank > index + 1 ? (
-                                                    <span style={{ color: '#0f0' }}>▲{user.lastRank - (index + 1)}</span>
-                                                ) : user.lastRank < index + 1 ? (
-                                                    <span style={{ color: '#f00' }}>▼{(index + 1) - user.lastRank}</span>
-                                                ) : (
-                                                    <span style={{ color: '#555' }}>━</span>
-                                                )}
-                                            </span>
-                                        )}
+                                            (activeTab === 'sem1' && user.semester === 1) || (activeTab === 'regular' && user.semester !== 1)
+                                        ) && (
+                                                <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 'bold' }}>
+                                                    {user.lastRank > index + 1 ? (
+                                                        <span style={{ color: '#0f0' }}>▲{user.lastRank - (index + 1)}</span>
+                                                    ) : user.lastRank < index + 1 ? (
+                                                        <span style={{ color: '#f00' }}>▼{(index + 1) - user.lastRank}</span>
+                                                    ) : (
+                                                        <span style={{ color: '#555' }}>━</span>
+                                                    )}
+                                                </span>
+                                            )}
                                         {!user.lastRank && <span style={{ marginLeft: '8px', fontSize: '10px', color: '#888' }}>NEW</span>}
                                     </td>
                                     <td style={{ padding: '16px', textAlign: 'right', fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#0f0' }}>
