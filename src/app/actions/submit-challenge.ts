@@ -16,21 +16,14 @@ export async function submitChallenge(challengeId: string, content: string) {
         throw new Error("Unauthorized");
     }
 
-    // Check Ban Status
+    // Ban check removed as per new requirements
     const dbUser = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { isBanned: true, semester: true, failedAttempts: true }
+        select: { isBanned: true }
     });
 
-    if (dbUser?.isBanned || (dbUser?.failedAttempts ?? 0) >= 6) {
-        // Double check if we need to explicitly set banned if not already (safeguard)
-        if (!dbUser?.isBanned) {
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { isBanned: true }
-            });
-        }
-        return { success: false, message: "Your account has been suspended due to policy violations (too many failed attempts). Contact admin." };
+    if (dbUser?.isBanned) {
+        return { success: false, message: "Your account has been suspended. Contact admin." };
     }
 
     if (!process.env.OPENAI_API_KEY) {
@@ -42,8 +35,18 @@ export async function submitChallenge(challengeId: string, content: string) {
         where: { userId: session.user.id, challengeId }
     });
 
-    if (existing && existing.status === 'APPROVED') {
-        return { success: false, message: "You have already completed this challenge successfully. Re-submissions are not allowed for approved challenges." };
+    if (existing) {
+        if (existing.status === 'APPROVED') {
+            return { success: false, message: "You have already completed this challenge successfully. Re-submissions are not allowed for approved challenges." };
+        }
+        if (existing.attemptCount >= 3) {
+            return {
+                success: false,
+                message: "You have used all 3 attempts for this question. It is now locked.",
+                locked: true,
+                remainingAttempts: 0
+            };
+        }
     }
 
     // Global Rate limiting: Check if user has submitted ANY challenge too recently AND failed
@@ -157,26 +160,11 @@ export async function submitChallenge(challengeId: string, content: string) {
             where: { id: session.user.id },
             data: {
                 score: { increment: score },
-                failedAttempts: 0 // Reset on success
+                // failedAttempts: 0 // No longer using global failedAttempts
             }
         });
-    } else {
-        // Increment failed attempts
-        const updatedUser = await prisma.user.update({
-            where: { id: session.user.id },
-            data: { failedAttempts: { increment: 1 } },
-            select: { failedAttempts: true }
-        });
-
-        if (updatedUser.failedAttempts >= 6) {
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { isBanned: true }
-            });
-            // We can return here or let it fall through, but the result is REJECTED anyway.
-            // The next time they try, they will be blocked at the start.
-        }
     }
+    // Rate limiting / locking Logic is handled by 'attemptCount' on the submission model now.
 
     if (existing) {
         await prisma.submission.update({
@@ -187,6 +175,7 @@ export async function submitChallenge(challengeId: string, content: string) {
                 aiScore: score,
                 status: status,
                 awardedPoints: score,
+                attemptCount: { increment: 1 },
                 lastSubmittedAt: new Date(),
                 updatedAt: new Date()
             }
@@ -201,6 +190,7 @@ export async function submitChallenge(challengeId: string, content: string) {
                 aiScore: score,
                 status: status,
                 awardedPoints: score,
+                attemptCount: 1,
                 lastSubmittedAt: new Date()
             }
         });
@@ -208,5 +198,16 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     revalidatePath('/', 'layout');
 
-    return { success: true, status, feedback: aiResult.feedback, points: score, lastSubmittedAt: new Date() };
+    // Calculate remaining attempts for the return value
+    const currentAttempts = existing ? existing.attemptCount + 1 : 1;
+    const remainingAttempts = Math.max(0, 3 - currentAttempts);
+
+    return {
+        success: true,
+        status,
+        feedback: aiResult.feedback,
+        points: score,
+        lastSubmittedAt: new Date(),
+        remainingAttempts
+    };
 }

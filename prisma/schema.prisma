@@ -130,6 +130,7 @@ model Submission {
   status          SubmissionStatus @default(PENDING_AI)
   isMerged        Boolean          @default(false)
   awardedPoints   Int              @default(0)
+  attemptCount    Int              @default(0)
   lastSubmittedAt DateTime? // Track last submission time for rate limiting
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt

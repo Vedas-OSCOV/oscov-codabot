@@ -32,7 +32,8 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
             status: true,
             aiFeedback: true,
             awardedPoints: true,
-            lastSubmittedAt: true
+            lastSubmittedAt: true,
+            attemptCount: true
         }
     });
 

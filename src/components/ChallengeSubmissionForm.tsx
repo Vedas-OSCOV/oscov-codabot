@@ -13,8 +13,15 @@ export default function ChallengeSubmissionForm({
     previousSubmission: any,
     globalLastSubmission?: { lastSubmittedAt: Date | null, status: string } | null
 }) {
-    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number } | null>(
-        previousSubmission ? { success: previousSubmission.status === 'APPROVED', status: previousSubmission.status, feedback: previousSubmission.aiFeedback, points: previousSubmission.aiScore } : null
+    const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number; remainingAttempts?: number; locked?: boolean } | null>(
+        previousSubmission ? {
+            success: previousSubmission.status === 'APPROVED',
+            status: previousSubmission.status,
+            feedback: previousSubmission.aiFeedback,
+            points: previousSubmission.awardedPoints,
+            remainingAttempts: Math.max(0, 3 - (previousSubmission.attemptCount || 0)),
+            locked: (previousSubmission.attemptCount || 0) >= 3 && previousSubmission.status !== 'APPROVED'
+        } : null
     );
 
     const [code, setCode] = useState("// Write your solution here...\n\nfunction solution() {\n  // your code\n}");
@@ -101,6 +108,9 @@ export default function ChallengeSubmissionForm({
     };
 
     const isRateLimited = remainingTime !== null && remainingTime > 0;
+    const isLocked = (result?.locked) || ((previousSubmission?.attemptCount || 0) >= 3 && previousSubmission?.status !== 'APPROVED' && !result?.success);
+    const attemptsUsed = result ? (3 - (result.remainingAttempts ?? 3)) : (previousSubmission?.attemptCount || 0);
+    const remainingAttemptsCount = result?.remainingAttempts ?? Math.max(0, 3 - (previousSubmission?.attemptCount || 0));
 
     if (result && result.status === 'APPROVED') {
         return (
@@ -140,8 +150,39 @@ export default function ChallengeSubmissionForm({
         });
     }
 
+    // Locked State UI
+    if (isLocked) {
+        return (
+            <div style={{ padding: '24px', background: '#1a1a1a', borderRadius: '16px', border: '1px solid #333' }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '14px' }}>LOCKED</h3>
+                <p style={{ margin: '0 0 16px 0', color: '#ccc', fontFamily: '"Share Tech Mono"' }}>
+                    You have used all 3 attempts for this problem. Access is now locked.
+                </p>
+                <div style={{ padding: '16px', background: '#000', borderRadius: '8px', border: '1px solid #333' }}>
+                    <strong style={{ display: 'block', marginBottom: '8px', color: '#666', fontSize: '12px' }}>LAST_FEEDBACK:</strong>
+                    <div style={{ whiteSpace: 'pre-wrap', color: '#DC2626', fontFamily: 'monospace', fontSize: '14px' }}>{result?.feedback || previousSubmission?.aiFeedback}</div>
+                </div>
+                <p style={{ marginTop: '24px', color: '#666', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
+                    &gt; SYSTEM: Please proceed to the next available challenge.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <form action={handleSubmit}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                <span style={{
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    color: remainingAttemptsCount > 1 ? '#0f0' : '#DC2626',
+                    background: '#1a1a1a',
+                    padding: '8px 12px',
+                    border: `1px solid ${remainingAttemptsCount > 1 ? '#0f0' : '#DC2626'}`
+                }}>
+                    ATTEMPTS: {attemptsUsed}/3
+                </span>
+            </div>
             {previousSubmission && previousSubmission.status === 'REJECTED' && (
                 <div style={{ padding: '16px', background: '#fee2e2', borderRadius: '12px', border: '1px solid #fecaca', marginBottom: '16px' }}>
                     <strong style={{ color: '#991b1b' }}>Previous Attempt Rejected</strong>
