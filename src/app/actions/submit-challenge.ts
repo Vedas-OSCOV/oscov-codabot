@@ -101,6 +101,7 @@ ${isSenior ? '4.Incomplete/Syntax/Logic errors->REJECT. Be EXTREMELY HARSH (Seni
 5.PASS (APPROVED) or FAIL (REJECTED).
 6.If Approved, suggest score 20-${challenge.points}.
 7. You are to be etremely harsh critic and can't be lenient.
+8. Any alnguage is permitted for submission.
 Return JSON:{"status":"APPROVED"|"REJECTED","score":number,"feedback":"Short feedback explaining why."}`;
 
     let aiResult;
