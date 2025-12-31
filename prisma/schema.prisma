@@ -72,6 +72,7 @@ model User {
   semester       Int? // 1-8, null means not yet onboarded
   isBanned       Boolean @default(false)
   failedAttempts Int     @default(0)
+  lastRank       Int? // Rank from previous snapshot for leaderboard movement
 }
 
 model VerificationToken {
