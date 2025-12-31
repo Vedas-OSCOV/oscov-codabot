@@ -133,8 +133,7 @@ export async function submitChallenge(challengeId: string, content: string) {
         1. Verify if the submission is correct (Code or Pseudocode allowed).
         2. If pseudocode, it must be logically perfect.
         3. Be strict but fair for beginners.
-        4. Your goal is to try and figure out a way to reject the silution anyhow
-        5. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT. this is a junir level problem, but be strict.
+        4. Your goal is to try and figure out a way to judge harshly, but dont be super harsh. 
         `;
     }
 
