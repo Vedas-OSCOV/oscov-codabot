@@ -93,8 +93,14 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
                     ) : (
                         <ChallengeSubmissionForm
                             challengeId={challenge.id}
-                            previousSubmission={submission}
-                            globalLastSubmission={globalLatestSubmission}
+                            previousSubmission={submission ? {
+                                ...submission,
+                                lastSubmittedAt: submission.lastSubmittedAt?.toISOString() || null
+                            } : null}
+                            globalLastSubmission={globalLatestSubmission ? {
+                                lastSubmittedAt: globalLatestSubmission.lastSubmittedAt?.toISOString() || null,
+                                status: globalLatestSubmission.status
+                            } : null}
                         />
                     )}
                 </div>

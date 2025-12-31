@@ -12,7 +12,7 @@ export default function ChallengeSubmissionForm({
 }: {
     challengeId: string,
     previousSubmission: any,
-    globalLastSubmission?: { lastSubmittedAt: Date | null, status: string } | null
+    globalLastSubmission?: { lastSubmittedAt: string | null, status: string } | null
 }) {
     const [result, setResult] = useState<{ success: boolean; message?: string; feedback?: string; points?: number; status?: string; rateLimitMs?: number; remainingAttempts?: number; locked?: boolean } | null>(
         previousSubmission ? {
@@ -40,17 +40,27 @@ export default function ChallengeSubmissionForm({
         // ONLY rate limit if the last attempt was REJECTED
         if (lastSubmitDate && lastStatus === 'REJECTED') {
             const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
-            const lastSubmitTime = new Date(lastSubmitDate).getTime();
-            const now = Date.now();
+
+            // Ensure we're working with UTC timestamps by converting to milliseconds since epoch
+            const lastSubmitTime = typeof lastSubmitDate === 'string'
+                ? new Date(lastSubmitDate).getTime()
+                : lastSubmitDate instanceof Date
+                    ? lastSubmitDate.getTime()
+                    : new Date(lastSubmitDate).getTime();
+
+            const now = Date.now(); // Already UTC timestamp
             const elapsed = now - lastSubmitTime;
             const remaining = RATE_LIMIT_MS - elapsed;
 
             console.log('Rate Limit Debug:', {
                 lastSubmitDate,
+                lastSubmitDateType: typeof lastSubmitDate,
                 lastSubmitTime,
+                lastSubmitTimeISO: new Date(lastSubmitTime).toISOString(),
                 now,
-                elapsed,
-                remaining
+                nowISO: new Date(now).toISOString(),
+                elapsed: Math.floor(elapsed / 1000) + 's',
+                remaining: Math.floor(remaining / 1000) + 's'
             });
 
             if (remaining > 0) {
