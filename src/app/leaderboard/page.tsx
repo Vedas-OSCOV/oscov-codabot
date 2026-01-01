@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import styles from './leaderboard.module.css';
 import { prisma } from '@/lib/db';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
+import CountdownTimer from "@/components/CountdownTimer";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,8 @@ export default async function LeaderboardPage() {
             <Navbar />
 
             <div className={styles.container}>
+                <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+
                 <div className={styles.header}>
                     <h1 className={styles.title}>Leaderboard</h1>
                     <p className={styles.subtitle}>Top contributors across all tracks.</p>

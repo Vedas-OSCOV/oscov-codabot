@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import ChallengeList from "@/components/ChallengeList";
+import CountdownTimer from "@/components/CountdownTimer";
 
 export const dynamic = 'force-dynamic';
 

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
+import CountdownTimer from "@/components/CountdownTimer";
 
 export const dynamic = 'force-dynamic';
 
@@ -70,20 +71,30 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
                 <a href="/challenges" style={{ color: '#888', fontSize: '14px', marginBottom: '24px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; BACK_TO_LIST</a>
 
-                {frenzyStatus.isActive && (
-                    <div className="retro-window" style={{ marginBottom: '32px', padding: '16px', background: 'rgba(220, 38, 38, 0.1)', border: '2px solid #DC2626', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ fontSize: '24px' }}>🔥</div>
-                        <div>
-                            <h3 style={{ margin: '0 0 4px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '12px' }}>FRENZY MODE ACTIVE</h3>
-                            <p style={{ margin: 0, color: '#fff', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
-                                2x Points for Seniors • 2-Minute Rate Limits
-                            </p>
-                        </div>
-                        <div style={{ marginLeft: 'auto', color: '#DC2626', fontFamily: '"Share Tech Mono"', fontSize: '12px' }}>
-                            {frenzyStatus.nepalTime} NPT
-                        </div>
+                <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+
+                <div className="retro-window" style={{
+                    marginBottom: '24px',
+                    padding: '16px',
+                    background: frenzyStatus.isActive ? 'rgba(220, 38, 38, 0.1)' : 'rgba(0, 0, 0, 0.3)',
+                    border: frenzyStatus.isActive ? '2px solid #DC2626' : '1px solid #333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px'
+                }}>
+                    <div style={{ fontSize: '24px' }}>{frenzyStatus.isActive ? '🔥' : '⏳'}</div>
+                    <div>
+                        <h3 style={{ margin: '0 0 4px 0', color: frenzyStatus.isActive ? '#DC2626' : '#888', fontFamily: '"Press Start 2P"', fontSize: '12px' }}>
+                            {frenzyStatus.isActive ? 'FRENZY MODE ACTIVE' : 'FRENZY MODE SCHEDULE'}
+                        </h3>
+                        <p style={{ margin: 0, color: '#ccc', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
+                            {frenzyStatus.isActive ? '2x Points for Seniors • 2-Minute Rate Limits' : frenzyStatus.message}
+                        </p>
                     </div>
-                )}
+                    <div style={{ marginLeft: 'auto', color: '#666', fontFamily: '"Share Tech Mono"', fontSize: '12px' }}>
+                        {frenzyStatus.nepalTime} NPT
+                    </div>
+                </div>
 
                 <div style={{ marginBottom: '32px' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>

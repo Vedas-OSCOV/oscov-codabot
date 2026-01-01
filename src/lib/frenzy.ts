@@ -7,17 +7,25 @@
  * - Reduced rate limit to 2 minutes (from 5 minutes)
  */
 
-export function isFrenzyMode(): boolean {
-    // Get current time in Nepal timezone (UTC+5:45)
+export function getNepalTimeComponents(): { hour: number; minute: number } {
+    // Nepal is UTC+5:45
+    // We add the offset to the current UTC time, then read the UTC components of the result.
+    // This gives us the "Wall Clock" time in Nepal, independent of the server's local timezone.
     const now = new Date();
+    const nepalOffsetMs = (5 * 60 + 45) * 60 * 1000; // +5h 45m in ms
+    // Create a date object shifted by the offset
+    const nepalTimeMs = now.getTime() + nepalOffsetMs;
+    const nepalDate = new Date(nepalTimeMs);
 
-    // Nepal is UTC+5:45, which is 345 minutes ahead of UTC
-    const nepalOffset = 345; // minutes
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const nepalTime = new Date(utcTime + (nepalOffset * 60000));
+    return {
+        // Use UTC getters because the date object strictly represents "Nepal Wall Clock Time as UTC"
+        hour: nepalDate.getUTCHours(),
+        minute: nepalDate.getUTCMinutes()
+    };
+}
 
-    const hour = nepalTime.getHours();
-
+export function isFrenzyMode(): boolean {
+    const { hour } = getNepalTimeComponents();
     // Frenzy mode is active from 22:00 (10 PM) to 23:59 (11:59 PM)
     return hour >= 22;
 }
@@ -37,13 +45,7 @@ export function getFrenzyStatus(): {
     message: string;
     nepalTime: string;
 } {
-    const now = new Date();
-    const nepalOffset = 345;
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const nepalTime = new Date(utcTime + (nepalOffset * 60000));
-
-    const hour = nepalTime.getHours();
-    const minute = nepalTime.getMinutes();
+    const { hour, minute } = getNepalTimeComponents();
     const isActive = hour >= 22;
 
     const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
