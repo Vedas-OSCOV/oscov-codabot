@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
 import CountdownTimer from "@/components/CountdownTimer";
+import { GAME_OVER_TIMESTAMP } from "@/lib/game-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,7 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
                 <a href="/challenges" style={{ color: '#888', fontSize: '14px', marginBottom: '24px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; BACK_TO_LIST</a>
 
-                <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+                <CountdownTimer targetDate={GAME_OVER_TIMESTAMP} />
 
                 <div className="retro-window" style={{
                     marginBottom: '24px',

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CountdownTimer from "@/components/CountdownTimer";
+import { GAME_OVER_TIMESTAMP } from "@/lib/game-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
         <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
-                <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+                <CountdownTimer targetDate={GAME_OVER_TIMESTAMP} />
 
                 {(() => {
                     const { getFrenzyStatus } = require('@/lib/frenzy');

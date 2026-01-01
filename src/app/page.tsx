@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import styles from "./page.module.css";
 import Link from "next/link";
 import CountdownTimer from "@/components/CountdownTimer";
+import { GAME_OVER_TIMESTAMP } from "@/lib/game-config";
 
 export default function Home() {
   return (
@@ -16,7 +17,7 @@ export default function Home() {
           The Vedas-OSCOV Coding Marathon. Join the elite, solve real open-source issues, and prove your mastery.
         </p>
 
-        <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+        <CountdownTimer targetDate={GAME_OVER_TIMESTAMP} />
 
         <div className={styles.ctas}>
           <Link href="/challenges" className="button-primary">

@@ -3,6 +3,7 @@ import styles from './leaderboard.module.css';
 import { prisma } from '@/lib/db';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import CountdownTimer from "@/components/CountdownTimer";
+import { GAME_OVER_TIMESTAMP } from "@/lib/game-config";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function LeaderboardPage() {
             <Navbar />
 
             <div className={styles.container}>
-                <CountdownTimer targetDate="2026-01-02T11:00:00+05:45" />
+                <CountdownTimer targetDate={GAME_OVER_TIMESTAMP} />
 
                 <div className={styles.header}>
                     <h1 className={styles.title}>Leaderboard</h1>
