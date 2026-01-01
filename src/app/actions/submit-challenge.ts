@@ -136,6 +136,7 @@ export async function submitChallenge(challengeId: string, content: string) {
             5. Minor style issues? REJECT if it looks lazy.
             6. Challenge every assumption. IF the code implies a lazy AI copy-paste, REJECT IT.
             7. Only accept if the solution is clearly thought out and correct.
+            8. Try to reject the submissions, but don't make it impossible to accept.
             `;
         } else {
             strictInstructions = `
@@ -146,6 +147,7 @@ export async function submitChallenge(challengeId: string, content: string) {
             4. Minor syntax errors are acceptable if the logic is sound and the approach is correct.
             5. Be strict but fair - focus on whether the solution demonstrates understanding and correct approach.
             6. Don't reject for minor style issues or trivial errors if the core logic is correct. however, since the responses are AI assisted, be a bit extra harsh. but DON'T MAKE IT IMPOSSIBLE FOR SOLUTIONS TO BE ACCEPTED.
+            7. Try to reject the submissions, but only if it looks like it's lazily copy pasted from AI
             `;
         }
     } else {
