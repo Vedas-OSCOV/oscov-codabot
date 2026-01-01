@@ -99,7 +99,7 @@ export async function submitChallenge(challengeId: string, content: string) {
     "${content}"
     `;
 
-    const isGodMode = challenge.points >= 300 && isSenior;
+    const isGodMode = challenge.points >= 650 && isSenior;
 
     let strictInstructions = "";
 
@@ -124,8 +124,6 @@ export async function submitChallenge(challengeId: string, content: string) {
         4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
         5. Be extremely harsh. This is a senior level challenge.
         6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
-        7. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT.
-        8. Your goal is to try and figure out a way to reject the silution anyhow
         `;
     } else {
         strictInstructions = `
