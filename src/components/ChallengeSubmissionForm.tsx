@@ -36,23 +36,26 @@ export default function ChallengeSubmissionForm({
     const [isGameOver, setIsGameOver] = useState(false);
     const { data: session } = useSession();
 
-    // Game Over Check
     useEffect(() => {
-        const checkGameOver = () => {
+        const calculateTimeUntilGameOver = () => {
             const now = new Date();
             const gameOverTime = new Date(GAME_OVER_TIMESTAMP);
-            if (now.getTime() >= gameOverTime.getTime()) {
-                setIsGameOver(true);
-            }
+            return gameOverTime.getTime() - now.getTime();
         };
 
-        checkGameOver(); // Initial check
-        const interval = setInterval(checkGameOver, 1000 * 60); // Check every minute
+        const timeUntil = calculateTimeUntilGameOver();
 
-        return () => clearInterval(interval);
+        if (timeUntil <= 0) {
+            setIsGameOver(true);
+        } else {
+            const timeoutId = setTimeout(() => {
+                setIsGameOver(true);
+            }, timeUntil);
+
+            return () => clearTimeout(timeoutId);
+        }
     }, []);
 
-    // Countdown timer
     useEffect(() => {
         if (remainingTime === null || remainingTime <= 0) return;
 
@@ -72,7 +75,6 @@ export default function ChallengeSubmissionForm({
     const [isPending, startTransition] = useTransition();
 
     function validateSubmission(content: string): string | null {
-        if (isGameOver) return "Game Over";
         // 1. Minimum length check
         if (content.trim().length < 50) {
             return "Submission too short. Please write at least 50 characters of actual code.";
@@ -160,33 +162,9 @@ export default function ChallengeSubmissionForm({
     const attemptsUsed = result ? (3 - (result.remainingAttempts ?? 3)) : (previousSubmission?.attemptCount || 0);
     const remainingAttemptsCount = result?.remainingAttempts ?? Math.max(0, 3 - (previousSubmission?.attemptCount || 0));
 
-    // GAME OVER - Blocking UI
-    if (isGameOver) {
-        return (
-            <div style={{ padding: '24px', background: '#1a1a1a', borderRadius: '16px', border: '1px solid #DC2626' }}>
-                <h3 style={{ margin: '0 0 16px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '18px', textAlign: 'center' }}>GAME OVER</h3>
-                <p style={{ margin: '0 0 16px 0', color: '#ccc', fontFamily: '"Share Tech Mono"', textAlign: 'center' }}>
-                    The event has ended. Submissions are no longer accepted.
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <button
-                        disabled
-                        style={{
-                            background: '#333',
-                            color: '#666',
-                            border: '2px solid #555',
-                            padding: '12px 24px',
-                            fontSize: '14px',
-                            cursor: 'not-allowed',
-                            fontFamily: '"Press Start 2P"'
-                        }}
-                    >
-                        GAME OVER
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    // Show Game Over Banner inside the form if specific blocking UI is preferred, or just rely on disabling inputs
+    // The user requested buttons change text to "Game Over" and nothing working.
+    // We will keep the form visible but disabled.
 
     if (result && result.status === 'APPROVED') {
         return (
@@ -226,7 +204,7 @@ export default function ChallengeSubmissionForm({
         });
     }
 
-    // Locked State UI
+    // Locked State UI (only if NOT game over - if game over we show the game over state on the form)
     if (isLocked) {
         return (
             <div style={{ padding: '24px', background: '#1a1a1a', borderRadius: '16px', border: '1px solid #333' }}>
@@ -247,7 +225,17 @@ export default function ChallengeSubmissionForm({
 
     return (
         <form onSubmit={handleSubmitClick}>
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px' }}>
+                {isGameOver && (
+                    <span style={{
+                        color: '#DC2626',
+                        fontFamily: '"Press Start 2P"',
+                        fontSize: '12px',
+                        animation: 'blink 1s infinite'
+                    }}>
+                        GAME OVER - SESSION ENDED
+                    </span>
+                )}
                 <span style={{
                     fontFamily: '"Press Start 2P"',
                     fontSize: '10px',
@@ -404,22 +392,26 @@ export default function ChallengeSubmissionForm({
                         fontSize: 14,
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
-                        contextmenu: false // Disable context menu to further discourage pasting via GUI
+                        contextmenu: false,
+                        readOnly: isGameOver // Lock editor when game over
                     }}
                 />
             </div>
 
             <button
                 type="submit"
-                disabled={isPending || isRateLimited}
+                disabled={isPending || isRateLimited || isGameOver}
                 style={{
-                    background: (isPending || isRateLimited) ? '#9ca3af' : '#0071e3',
+                    background: (isPending || isRateLimited || isGameOver) ? '#333' : '#0071e3',
                     // ... existing styles ...
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    cursor: (isPending || isRateLimited || isGameOver) ? 'not-allowed' : 'pointer',
+                    color: isGameOver ? '#DC2626' : 'white',
+                    borderColor: isGameOver ? '#DC2626' : undefined
                 }}
             >
                 {isPending && <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />}
-                {isPending ? 'Processing...' : isRateLimited ? 'Rate Limited' : 'Submit Solution'}
+                {isPending ? 'Processing...' : isRateLimited ? 'Rate Limited' : isGameOver ? 'GAME OVER' : 'Submit Solution'}
                 <style jsx>{`
                     @keyframes spin {
                         to { transform: rotate(360deg); }
