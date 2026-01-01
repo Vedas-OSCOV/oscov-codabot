@@ -120,7 +120,7 @@ export async function submitChallenge(challengeId: string, content: string) {
         Your task:
         1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
         2. Check for logic, edge cases, and efficiency.
-        3. The solution must be fully functional code (Python, JS, C++, etc).
+        3. The solution must satidfy the problem
         4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
         5. Be extremely harsh. This is a senior level challenge.
         6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
