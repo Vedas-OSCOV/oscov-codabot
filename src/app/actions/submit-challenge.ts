@@ -11,6 +11,11 @@ export async function submitChallenge(challengeId: string, content: string) {
         throw new Error("Submission too large (max 20k characters).");
     }
 
+    const { isGameOver } = await import('@/lib/game-config');
+    if (isGameOver()) {
+        return { success: false, message: "Game Over. Submissions are no longer accepted." };
+    }
+
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.email) {
         throw new Error("Unauthorized");

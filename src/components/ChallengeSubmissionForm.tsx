@@ -5,6 +5,8 @@ import { submitChallenge } from '@/app/actions/submit-challenge';
 import { useSession } from 'next-auth/react';
 import Editor from '@monaco-editor/react';
 
+import { GAME_OVER_TIMESTAMP } from '@/lib/game-config';
+
 export default function ChallengeSubmissionForm({
     challengeId,
     previousSubmission,
@@ -31,7 +33,24 @@ export default function ChallengeSubmissionForm({
     const [remainingTime, setRemainingTime] = useState<number | null>(initialRemainingTime);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [isGameOver, setIsGameOver] = useState(false);
     const { data: session } = useSession();
+
+    // Game Over Check
+    useEffect(() => {
+        const checkGameOver = () => {
+            const now = new Date();
+            const gameOverTime = new Date(GAME_OVER_TIMESTAMP);
+            if (now.getTime() >= gameOverTime.getTime()) {
+                setIsGameOver(true);
+            }
+        };
+
+        checkGameOver(); // Initial check
+        const interval = setInterval(checkGameOver, 1000 * 60); // Check every minute
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Countdown timer
     useEffect(() => {
@@ -53,6 +72,7 @@ export default function ChallengeSubmissionForm({
     const [isPending, startTransition] = useTransition();
 
     function validateSubmission(content: string): string | null {
+        if (isGameOver) return "Game Over";
         // 1. Minimum length check
         if (content.trim().length < 50) {
             return "Submission too short. Please write at least 50 characters of actual code.";
@@ -89,6 +109,8 @@ export default function ChallengeSubmissionForm({
 
     function handleSubmitClick(e: React.FormEvent) {
         e.preventDefault();
+
+        if (isGameOver) return;
 
         // Pre-validation
         const error = validateSubmission(code);
@@ -133,9 +155,38 @@ export default function ChallengeSubmissionForm({
     };
 
     const isRateLimited = remainingTime !== null && remainingTime > 0;
+    // Calculate if locked based on attempts, BUT override if Game Over
     const isLocked = (result?.locked) || ((previousSubmission?.attemptCount || 0) >= 3 && previousSubmission?.status !== 'APPROVED' && !result?.success);
     const attemptsUsed = result ? (3 - (result.remainingAttempts ?? 3)) : (previousSubmission?.attemptCount || 0);
     const remainingAttemptsCount = result?.remainingAttempts ?? Math.max(0, 3 - (previousSubmission?.attemptCount || 0));
+
+    // GAME OVER - Blocking UI
+    if (isGameOver) {
+        return (
+            <div style={{ padding: '24px', background: '#1a1a1a', borderRadius: '16px', border: '1px solid #DC2626' }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '18px', textAlign: 'center' }}>GAME OVER</h3>
+                <p style={{ margin: '0 0 16px 0', color: '#ccc', fontFamily: '"Share Tech Mono"', textAlign: 'center' }}>
+                    The event has ended. Submissions are no longer accepted.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <button
+                        disabled
+                        style={{
+                            background: '#333',
+                            color: '#666',
+                            border: '2px solid #555',
+                            padding: '12px 24px',
+                            fontSize: '14px',
+                            cursor: 'not-allowed',
+                            fontFamily: '"Press Start 2P"'
+                        }}
+                    >
+                        GAME OVER
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     if (result && result.status === 'APPROVED') {
         return (
