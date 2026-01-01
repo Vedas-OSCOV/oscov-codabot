@@ -7,7 +7,7 @@ interface CountdownTimerProps {
     label?: string;
 }
 
-export default function CountdownTimer({ targetDate, label = "HACKATHON ENDS IN" }: CountdownTimerProps) {
+export default function CountdownTimer({ targetDate, label = "CODE-ATHON ENDS IN" }: CountdownTimerProps) {
     const [timeLeft, setTimeLeft] = useState<{
         days: number;
         hours: number;
