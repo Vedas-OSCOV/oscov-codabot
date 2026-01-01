@@ -57,7 +57,8 @@ export async function submitChallenge(challengeId: string, content: string) {
     });
 
     if (lastSubmission && lastSubmission.lastSubmittedAt && lastSubmission.status === 'REJECTED') {
-        const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const { getRateLimit } = await import('@/lib/frenzy');
+        const RATE_LIMIT_MS = getRateLimit(); // Dynamic: 2 min during frenzy, 5 min otherwise
         const timeSinceLastSubmit = Date.now() - lastSubmission.lastSubmittedAt.getTime();
 
         if (timeSinceLastSubmit < RATE_LIMIT_MS) {
@@ -119,19 +120,20 @@ export async function submitChallenge(challengeId: string, content: string) {
         strictInstructions = `
         Your task:
         1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
-        2. Check for logic, edge cases, and efficiency.
-        3. The solution must satidfy the problem
-        4. If the code is incomplete, has syntax errors, or logic flaws -> REJECT IT.
-        5. Be extremely harsh. This is a senior level challenge.
-        6. The submissions are most likely AI assisted. so make your checks more strict and harsh.
+        2. Check for logic correctness and whether it solves the problem.
+        3. The solution must satisfy the problem requirements.
+        4. Minor syntax errors are acceptable if the logic is sound and the approach is correct.
+        5. Be strict but fair - focus on whether the solution demonstrates understanding and correct approach.
+        6. Don't reject for minor style issues or trivial errors if the core logic is correct. however, since the responses are AI assisted, be a bit extra harsh. but DON'T MAKE IT IMPOSSIBLE FOR SOLUTIONS TO BE ACCEPTED.
         `;
     } else {
         strictInstructions = `
         Your task:
         1. Verify if the submission is correct (Code or Pseudocode allowed).
-        2. If pseudocode, it must be logically perfect.
-        3. Be strict but fair for beginners.
-        4. Your goal is to try and figure out a way to judge harshly, but dont be super harsh. 
+        2. If pseudocode, it must be logically sound and demonstrate understanding.
+        3. Be fair and encouraging for beginners - focus on correct logic and approach.
+        4. Minor errors are acceptable if the core concept is demonstrated correctly.
+        5. Provide constructive feedback to help them improve.
         `;
     }
 
@@ -173,7 +175,14 @@ export async function submitChallenge(challengeId: string, content: string) {
     }
 
     const status = aiResult.status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
-    const score = aiResult.status === 'APPROVED' ? (aiResult.score || challenge.points) : 0;
+    let score = aiResult.status === 'APPROVED' ? (aiResult.score || challenge.points) : 0;
+
+    // Apply frenzy mode multiplier for seniors
+    if (status === 'APPROVED' && isSenior) {
+        const { getPointsMultiplier } = await import('@/lib/frenzy');
+        const multiplier = getPointsMultiplier(isSenior);
+        score = score * multiplier;
+    }
 
     if (status === 'APPROVED') {
         await prisma.user.update({

@@ -43,6 +43,35 @@ export default async function DashboardPage() {
             <Navbar />
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
 
+                {(() => {
+                    const { getFrenzyStatus } = require('@/lib/frenzy');
+                    const frenzy = getFrenzyStatus();
+                    return (
+                        <div className="retro-window" style={{
+                            marginBottom: '24px',
+                            padding: '16px',
+                            background: frenzy.isActive ? 'rgba(220, 38, 38, 0.1)' : 'rgba(0, 0, 0, 0.3)',
+                            border: frenzy.isActive ? '2px solid #DC2626' : '1px solid #333',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px'
+                        }}>
+                            <div style={{ fontSize: '24px' }}>{frenzy.isActive ? '🔥' : '⏳'}</div>
+                            <div>
+                                <h3 style={{ margin: '0 0 4px 0', color: frenzy.isActive ? '#DC2626' : '#888', fontFamily: '"Press Start 2P"', fontSize: '10px' }}>
+                                    {frenzy.isActive ? 'FRENZY_MODE_ACTIVE' : 'FRENZY_MODE_SCHEDULE'}
+                                </h3>
+                                <p style={{ margin: 0, color: '#ccc', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
+                                    {frenzy.message}
+                                </p>
+                            </div>
+                            <div style={{ marginLeft: 'auto', color: '#666', fontFamily: '"Share Tech Mono"', fontSize: '12px' }}>
+                                {frenzy.nepalTime} NPT
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 <div className="retro-window" style={{ marginBottom: '40px', padding: '32px', display: 'flex', alignItems: 'center', gap: '24px' }}>
                     {user.image && <img src={user.image} style={{ width: 80, height: 80, border: '4px solid #fff', imageRendering: 'pixelated' }} />}
                     <div>

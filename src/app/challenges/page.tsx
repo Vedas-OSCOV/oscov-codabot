@@ -58,6 +58,33 @@ export default async function ChallengesPage() {
 
                 <div style={{ marginBottom: '40px' }}>
                     <Link href="/dashboard" style={{ color: '#888', fontSize: '14px', marginBottom: '16px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; DASHBOARD</Link>
+
+                    {(() => {
+                        const { getFrenzyStatus } = require('@/lib/frenzy');
+                        const frenzy = getFrenzyStatus();
+                        if (frenzy.isActive) {
+                            return (
+                                <div className="retro-window" style={{
+                                    marginBottom: '24px',
+                                    padding: '16px',
+                                    background: 'rgba(220, 38, 38, 0.1)',
+                                    border: '2px solid #DC2626',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '16px'
+                                }}>
+                                    <div style={{ fontSize: '24px' }}>🔥</div>
+                                    <div>
+                                        <h3 style={{ margin: '0 0 4px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '12px' }}>FRENZY MODE ACTIVE</h3>
+                                        <p style={{ margin: 0, color: '#fff', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
+                                            2x Points for Seniors • 2-Minute Rate Limits
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })()}
                     <h1 style={{ fontSize: '32px', marginBottom: '16px', color: '#fff', textShadow: '3px 3px #DC2626' }}>
                         {title}
                     </h1>

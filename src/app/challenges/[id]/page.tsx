@@ -17,6 +17,11 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
         redirect('/api/auth/signin');
     }
 
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { semester: true }
+    });
+
     const challenge = await prisma.challenge.findUnique({
         where: { id: challengeId }
     });
@@ -48,18 +53,37 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
 
     let rateLimitRemainingMs = null;
     if (globalLatestSubmission && globalLatestSubmission.status === 'REJECTED' && globalLatestSubmission.lastSubmittedAt) {
-        const RATE_LIMIT_MS = 5 * 60 * 1000;
+        const { getRateLimit } = await import('@/lib/frenzy');
+        const RATE_LIMIT_MS = getRateLimit();
         const timeSinceLastSubmit = Date.now() - globalLatestSubmission.lastSubmittedAt.getTime();
         if (timeSinceLastSubmit < RATE_LIMIT_MS) {
             rateLimitRemainingMs = RATE_LIMIT_MS - timeSinceLastSubmit;
         }
     }
 
+    const { getFrenzyStatus } = await import('@/lib/frenzy');
+    const frenzyStatus = getFrenzyStatus();
+
     return (
         <main style={{ minHeight: '100vh', paddingTop: '100px' }}>
             <Navbar />
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
                 <a href="/challenges" style={{ color: '#888', fontSize: '14px', marginBottom: '24px', display: 'inline-block', fontFamily: '"Share Tech Mono"' }}>&lt; BACK_TO_LIST</a>
+
+                {frenzyStatus.isActive && (
+                    <div className="retro-window" style={{ marginBottom: '32px', padding: '16px', background: 'rgba(220, 38, 38, 0.1)', border: '2px solid #DC2626', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ fontSize: '24px' }}>🔥</div>
+                        <div>
+                            <h3 style={{ margin: '0 0 4px 0', color: '#DC2626', fontFamily: '"Press Start 2P"', fontSize: '12px' }}>FRENZY MODE ACTIVE</h3>
+                            <p style={{ margin: 0, color: '#fff', fontSize: '12px', fontFamily: '"Share Tech Mono"' }}>
+                                2x Points for Seniors • 2-Minute Rate Limits
+                            </p>
+                        </div>
+                        <div style={{ marginLeft: 'auto', color: '#DC2626', fontFamily: '"Share Tech Mono"', fontSize: '12px' }}>
+                            {frenzyStatus.nepalTime} NPT
+                        </div>
+                    </div>
+                )}
 
                 <div style={{ marginBottom: '32px' }}>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
@@ -68,6 +92,7 @@ export default async function ChallengeDetailPage(props: { params: Promise<{ id:
                         </span>
                         <span style={{ fontSize: '10px', color: '#fff', border: '2px solid #fff', padding: '4px 12px', fontFamily: '"Press Start 2P"' }}>
                             {challenge.points} PTS
+                            {frenzyStatus.isActive && (user?.semester || 0) > 1 && <span style={{ color: '#0f0', marginLeft: '6px' }}>(x2)</span>}
                         </span>
                         {isSolved && (
                             <span style={{ fontSize: '10px', color: '#000', background: '#0f0', padding: '6px 12px', fontFamily: '"Press Start 2P"' }}>
