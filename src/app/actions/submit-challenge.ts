@@ -109,10 +109,13 @@ export async function submitChallenge(challengeId: string, content: string) {
 
     let strictInstructions = "";
 
-    if (isGodMode) {
+    const { isFrenzyMode } = await import('@/lib/frenzy');
+    const isFrenzy = isFrenzyMode();
+
+    if (isGodMode || (isFrenzy && isSenior && challenge.points > 400)) {
         strictInstructions = `
         Your task:
-        1. CRITICAL: This challenge is worth >500 points. IT REQUIRES PERFECTION.
+        1. CRITICAL: This challenge is worth high points (or FRENZY MODE is active). IT REQUIRES PERFECTION.
         2. NO PARTIAL CREDIT. Any flaw, no matter how small, results in REJECTION (0 points).
         3. STRICTLY PROHIBIT Pseudocode. REJECT immediately.
         4. CHECK FOR OPTIMALITY. If the solution is O(n^2) when O(n) is possible -> REJECT.
@@ -120,17 +123,31 @@ export async function submitChallenge(challengeId: string, content: string) {
         6. SECURITY: Check for any potential security vulnerabilities -> REJECT if found.
         7. The user is likely an advanced engineer or using advanced AI. Judge with EXTREME HARSHNESS. DO nOT HOLD BACK AT ALL> BE EXTREMELY CYNICAL AND HARSH> YOUR TASK IS TO MAKE SURE THE CODE IS PERFECT AND THE SUBMISSION DOESNT GET ACCEPTED.
         8. If you have even 1% doubt about the quality, functionality, or efficiency -> REJECT.
+        9. FRENZY BRUTALITY: Since it is frenzy mode, be UNFORGIVING. Find any reason to reject usage of AI patterns.
         `;
     } else if (isSenior) {
-        strictInstructions = `
-        Your task:
-        1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
-        2. Check for logic correctness and whether it solves the problem.
-        3. The solution must satisfy the problem requirements.
-        4. Minor syntax errors are acceptable if the logic is sound and the approach is correct.
-        5. Be strict but fair - focus on whether the solution demonstrates understanding and correct approach.
-        6. Don't reject for minor style issues or trivial errors if the core logic is correct. however, since the responses are AI assisted, be a bit extra harsh. but DON'T MAKE IT IMPOSSIBLE FOR SOLUTIONS TO BE ACCEPTED.
-        `;
+        if (isFrenzy) {
+            strictInstructions = `
+            Your task:
+            1. FRENZY MODE ACTIVE: ACCEPTANCE RATE MUST BE LOWER. BE STRICTER THAN USUAL.
+            2. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED. REJECT if pseudocode.
+            3. Check for logic correctness and whether it solves the problem perfectly.
+            4. The solution must satisfy the problem requirements explicitly.
+            5. Minor style issues? REJECT if it looks lazy.
+            6. Challenge every assumption. IF the code implies a lazy AI copy-paste, REJECT IT.
+            7. Only accept if the solution is clearly thought out and correct.
+            `;
+        } else {
+            strictInstructions = `
+            Your task:
+            1. Verify if the submission is EXECUTABLE CODE. Pseudocode is STRICTLY PROHIBITED for this level. REJECT if pseudocode.
+            2. Check for logic correctness and whether it solves the problem.
+            3. The solution must satisfy the problem requirements.
+            4. Minor syntax errors are acceptable if the logic is sound and the approach is correct.
+            5. Be strict but fair - focus on whether the solution demonstrates understanding and correct approach.
+            6. Don't reject for minor style issues or trivial errors if the core logic is correct. however, since the responses are AI assisted, be a bit extra harsh. but DON'T MAKE IT IMPOSSIBLE FOR SOLUTIONS TO BE ACCEPTED.
+            `;
+        }
     } else {
         strictInstructions = `
         Your task:
