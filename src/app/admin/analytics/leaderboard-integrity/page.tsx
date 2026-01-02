@@ -8,7 +8,7 @@ export default async function LeaderboardIntegrityPage() {
 
     // Logic to identify suspicious users from the returned data
     // Assuming data is an array of users with integrity metrics
-    const suspiciousUsers = data.filter(u => u.suspicious);
+    const suspiciousUsers = data.suspiciousUsers;
 
     // Insight Logic
     let cheatVerdict: {
@@ -33,9 +33,9 @@ export default async function LeaderboardIntegrityPage() {
     }
 
     const rows = suspiciousUsers.map(u => [
-        u.username,
+        u.username || 'Anonymous',
         u.fastSolves?.toString() || '0',
-        u.reason || 'Unknown',
+        u.fastSolves > 0 ? 'Too many fast solves (<30s)' : 'Impossible solve speed (<10s)',
     ]);
 
     // If data is just a list of all users, we might want to show top users too, 
