@@ -10,49 +10,68 @@ export async function getUserDataset() {
         throw new Error("Unauthorized");
     }
 
-    // Fetch users with heavy inclusion for analysis
-    const users = await prisma.user.findMany({
-        orderBy: { submissions: { _count: 'desc' } },
+    // Fetch all submissions for granular behavioral analysis
+    const submissions = await prisma.submission.findMany({
+        orderBy: { createdAt: 'desc' },
         include: {
-            submissions: {
-                select: { createdAt: true, status: true, aiScore: true },
-                orderBy: { createdAt: 'desc' }
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    semester: true,
+                    isBanned: true
+                }
+            },
+            challenge: {
+                select: {
+                    title: true,
+                    difficulty: true,
+                    points: true
+                }
+            },
+            issue: {
+                select: {
+                    title: true,
+                    basePoints: true
+                }
             }
         }
     });
 
     // Process data into flat format for CSV
-    return users.map(u => {
-        const total = u.submissions.length;
-        const passed = u.submissions.filter(s => s.status === 'APPROVED').length;
-        const rejected = u.submissions.filter(s => s.status === 'REJECTED').length;
-
-        // Behavioral Analysis
-        let rapidFireEvents = 0;
-        let avgScore = 0;
-        let totalScore = 0;
-
-        if (total > 0) {
-            for (let i = 0; i < u.submissions.length - 1; i++) {
-                const diff = u.submissions[i].createdAt.getTime() - u.submissions[i + 1].createdAt.getTime();
-                if (diff < 60 * 1000) rapidFireEvents++; // < 1 min gaps
-            }
-            totalScore = u.submissions.reduce((acc, curr) => acc + (curr.aiScore || 0), 0);
-            avgScore = Math.round(totalScore / total);
-        }
+    return submissions.map(s => {
+        // Determine problem context
+        const problemType = s.challengeId ? 'CHALLENGE' : s.issueId ? 'ISSUE' : 'UNKNOWN';
+        const problemTitle = s.challenge?.title || s.issue?.title || 'Unknown';
+        const difficulty = s.challenge?.difficulty || 'N/A';
+        const maxPoints = s.challenge?.points || s.issue?.basePoints || 0;
 
         return {
-            userId: u.id,
-            name: u.name || 'Anonymous',
-            email: u.email,
-            isBanned: u.isBanned,
-            joinedAt: u.createdAt.toISOString(),
-            totalSubmissions: total,
-            passRate: total > 0 ? (passed / total).toFixed(2) : 0,
-            avgAiScore: avgScore,
-            rapidFireBursts: rapidFireEvents,
-            lastActive: u.submissions[0]?.createdAt.toISOString() || 'Never',
-            riskFactor: total > 0 ? (rejected / total).toFixed(2) : 0
+            submission_id: s.id,
+            timestamp: s.createdAt.toISOString(),
+            user_id: s.user?.id || 'deleted',
+            user_name: s.user?.name || 'Anonymous',
+            user_email: s.user?.email || 'No Email',
+            semester: s.user?.semester || 'N/A',
+            is_banned: s.user?.isBanned ? 'YES' : 'NO',
+
+            problem_type: problemType,
+            problem_title: problemTitle,
+            difficulty: difficulty,
+
+            status: s.status,
+            attempt_count: s.attemptCount,
+            awarded_points: s.awardedPoints,
+            max_points: maxPoints,
+            ai_score: s.aiScore || 0,
+
+            // Content Analysis
+            code_length: s.content?.length || 0,
+            // Sanitize content for CSV (basic newline replacement to keep it on one line if preferred, 
+            // but standard CSV handles newlines in quotes. We'll leave it raw-ish but handle it in frontend)
+            code_snippet: s.content ? s.content.slice(0, 500).replace(/[\r\n]+/g, ' ') : '', // Init 500 chars, flattened
+            ai_feedback_snippet: s.aiFeedback ? s.aiFeedback.slice(0, 300).replace(/[\r\n]+/g, ' ') : ''
         };
     });
 }

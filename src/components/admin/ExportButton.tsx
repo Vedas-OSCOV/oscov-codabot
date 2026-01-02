@@ -16,9 +16,16 @@ export default function ExportButton() {
                 return;
             }
 
-            // Convert to CSV
+            // Convert to CSV with proper escaping
             const headers = Object.keys(data[0]).join(',');
-            const rows = data.map(row => Object.values(row).map(v => `"${v}"`).join(','));
+            const rows = data.map(row =>
+                Object.values(row).map(v => {
+                    if (v === null || v === undefined) return '""';
+                    const stringValue = String(v);
+                    // Escape double quotes by doubling them
+                    return `"${stringValue.replace(/"/g, '""')}"`;
+                }).join(',')
+            );
             const csvContent = [headers, ...rows].join('\n');
 
             // Download
