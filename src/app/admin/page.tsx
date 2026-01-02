@@ -89,22 +89,39 @@ export default function AdminDashboard() {
 
                 {/* Usage Chart */}
                 <div className="retro-window" style={{ flex: 2, minWidth: '300px' }}>
-                    <h3 style={{ color: 'white', marginBottom: '16px' }}>TRAFFIC_VOLUME (7 DAYS)</h3>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '150px', gap: '5%', paddingBottom: '20px', borderBottom: '1px solid #333' }}>
-                        {stats?.usageHistory?.map((day: any) => {
-                            // Normalize height
-                            const max = Math.max(...stats.usageHistory.map((d: any) => d.count)) || 1;
-                            const height = Math.max((day.count / max) * 100, 5); // min 5%
-                            return (
-                                <div key={day.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{ width: '100%', height: `${height}%`, background: '#DC2626', minHeight: '4px' }} title={`${day.count} submissions`}></div>
-                                    <span style={{ fontSize: '10px', color: '#666', transform: 'rotate(-45deg)', transformOrigin: 'left bottom', whiteSpace: 'nowrap' }}>
-                                        {day.date.slice(5)}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <h3 style={{ color: 'white', marginBottom: '16px' }}>
+                        TRAFFIC_VOLUME ({stats?.usageHistory?.length || 0} DAYS)
+                    </h3>
+
+                    {!stats?.usageHistory?.length ? (
+                        <div style={{ height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', borderBottom: '1px solid #333' }}>
+                            NO_DATA_AVAILABLE
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', alignItems: 'flex-end', height: '150px', gap: '5%', paddingBottom: '10px', borderBottom: '1px solid #333' }}>
+                            {stats.usageHistory.map((day: any) => {
+                                // Normalize height (Pixels now, max 100px to leave room for labels)
+                                const max = Math.max(...stats.usageHistory.map((d: any) => d.count)) || 1;
+                                const heightPx = Math.max((day.count / max) * 100, 4); // max 100px, min 4px
+
+                                return (
+                                    <div key={day.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '100%', height: `${heightPx}px`, background: '#ef4444', minHeight: '4px', position: 'relative', boxShadow: '0 0 10px rgba(220, 38, 38, 0.5)' }} title={`${day.count} submissions`}>
+                                            <span style={{
+                                                position: 'absolute', top: -25, left: '50%', transform: 'translateX(-50%)',
+                                                fontSize: '14px', fontWeight: 'bold', color: '#fff', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10
+                                            }}>
+                                                {day.count > 0 ? day.count : ''}
+                                            </span>
+                                        </div>
+                                        <span style={{ fontSize: '12px', color: '#888', transform: 'rotate(-45deg)', transformOrigin: 'top left', whiteSpace: 'nowrap', marginTop: '4px' }}>
+                                            {day.date.slice(5)}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* System Menu */}
