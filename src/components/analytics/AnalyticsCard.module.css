@@ -1,0 +1,87 @@
+.card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+    height: 100%;
+}
+
+.card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.title {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+}
+
+.info {
+    cursor: help;
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.metric {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.value {
+    font-size: 32px;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.trend {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.up {
+    color: #10B981;
+}
+
+.down {
+    color: #EF4444;
+}
+
+.neutral {
+    color: #9CA3AF;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.content {
+    margin-top: 16px;
+    flex: 1;
+}

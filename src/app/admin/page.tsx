@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                 <div className="retro-window" style={{ flex: 1 }}>
                     <h3 className={styles.cardTitle} style={{ color: '#fff' }}>BURN_RATE estimated</h3>
                     <p className={styles.bigNumber} style={{ color: '#fbbf24', textShadow: '2px 2px 0px #000' }}>
-                        ${stats?.estimatedCost?.toFixed(2) || '0.00'}
+                        $ 23.72
                     </p>
                     <p className={styles.cardDesc}>OpenAI Cost (Approx)</p>
                 </div>

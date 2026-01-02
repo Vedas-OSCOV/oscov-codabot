@@ -1,0 +1,64 @@
+.container {
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.header {
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: var(--font-retro);
+    text-transform: uppercase;
+    text-shadow: 2px 2px #DC2626;
+    color: #fff;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 14px;
+    max-width: 600px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.gridTwo {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chartWrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.section {
+    margin-bottom: 48px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+    font-family: var(--font-mono);
+}
+
+.cardGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}

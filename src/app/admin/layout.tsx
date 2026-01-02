@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import styles from './admin-layout.module.css';
+import AnalyticsSidebarGroup from '@/components/admin/AnalyticsSidebarGroup';
 
 export default function AdminLayout({
     children,
@@ -22,6 +23,7 @@ export default function AdminLayout({
                     <Link href="/admin/monitoring" className={styles.link}>
                         Deep Monitoring
                     </Link>
+                    <AnalyticsSidebarGroup />
                     <div className={styles.divider} />
                     <Link href="/" className={styles.backLink}>
                         ← Back to Public
@@ -31,6 +33,6 @@ export default function AdminLayout({
             <main className={styles.main}>
                 {children}
             </main>
-        </div>
+        </div >
     );
 }

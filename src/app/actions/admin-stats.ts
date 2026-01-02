@@ -13,9 +13,16 @@ export async function getAdminStats() {
     // 1. Total Submissions Count
     const totalSubmissions = await prisma.submission.count();
 
-    // 2. Active Users (Top 20 by recency)
-    const activeUsers = await prisma.user.findMany({
-        take: 20,
+    // 2. Active Users (Actually online: valid session)
+    // Find users who have at least one session that expires in the future
+    const onlineUsers = await prisma.user.findMany({
+        where: {
+            sessions: {
+                some: {
+                    expires: { gt: new Date() }
+                }
+            }
+        },
         orderBy: {
             submissions: {
                 _count: 'desc'
@@ -33,8 +40,8 @@ export async function getAdminStats() {
         }
     });
 
-    // 3. Calculate detailed user stats (Risk Score)
-    const userStats = await Promise.all(activeUsers.map(async (u) => {
+    // 3. Calculate detailed user stats (Risk Score) for ONLINE users
+    const userStats = await Promise.all(onlineUsers.map(async (u) => {
         const total = u._count.submissions;
         const rejected = await prisma.submission.count({
             where: { userId: u.id, status: 'REJECTED' }
@@ -52,35 +59,45 @@ export async function getAdminStats() {
         };
     }));
 
-    // 4. Usage History (Last 7 Days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // 4. Usage History (Since Wednesday, Dec 31 2025)
+    // "Since Wednesday till today" implies Dec 31, Jan 1, Jan 2 (if today is Jan 2)
+    const startDate = new Date('2025-12-31T00:00:00.000Z');
 
-
-    // Re-do: Fetch dates only
+    // Fetch submissions only from start date
     const rawSubmissions = await prisma.submission.findMany({
-        where: { lastSubmittedAt: { gte: sevenDaysAgo } },
-        select: { lastSubmittedAt: true }
+        where: { createdAt: { gte: startDate } }, // Use createdAt as lastSubmittedAt might be null or optional
+        select: { createdAt: true }
     });
 
-    const usageHistory = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        const count = rawSubmissions.filter(s => s.lastSubmittedAt && s.lastSubmittedAt.toISOString().startsWith(dateStr)).length;
+    // Generate date array from startDate to today
+    const dateArray: string[] = [];
+    const currentDate = new Date(startDate);
+    const today = new Date();
+
+    while (currentDate <= today || currentDate.toDateString() === today.toDateString()) {
+        dateArray.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+
+        // Safety break for loop
+        if (dateArray.length > 20) break;
+    }
+    // Ensure "today" (Jan 2) is included if loop condition was strict
+    const todayStr = today.toISOString().split('T')[0];
+    if (!dateArray.includes(todayStr)) dateArray.push(todayStr);
+
+
+    const usageHistory = dateArray.map(dateStr => {
+        const count = rawSubmissions.filter(s => s.createdAt.toISOString().startsWith(dateStr)).length;
         return { date: dateStr, count };
-    }).reverse();
+    });
 
 
     // 5. Cost Estimation
-    // GPT-4o-mini is approx $0.60 per 1M input tokens, $1.20 output.
-    // Avg run: 500 in, 200 out. => (500/1M * 0.6) + (200/1M * 1.2) = 0.0003 + 0.00024 = $0.00054
-    // Let's use conservative $0.001 per run.
     const estimatedCost = totalSubmissions * 0.001;
 
     return {
         totalSubmissions,
-        activeUsersCount: activeUsers.length,
+        activeUsersCount: onlineUsers.length,
         userStats,
         usageHistory,
         estimatedCost
