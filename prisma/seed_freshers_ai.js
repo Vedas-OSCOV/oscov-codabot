@@ -10,21 +10,25 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-async function generateBatch(batchNum) {
-    console.log(`Generating batch ${batchNum}...`);
+async function generateBatch(targetPoints) {
+    console.log(`Generating batch for ${targetPoints} points...`);
+
+    // New topics for freshers
+    const topics = "Linked Lists, Binary Search Trees, Sliding Window, Two Pointers, Greedy Algorithms, Basic Dynamic Programming";
+
     const prompt = `
-    Generate 10 UNIQUE, creative, and strictly algorithmic Coding Challenges suitable for 1st-year implementations (Data Structures & Algorithms).
-    Topics: Arrays, Strings, Hashes, Stacks, Queues, Simple Recursion.
-    Difficulty: Easy to Medium (LeetCode style).
+    Generate 10 UNIQUE, creative, and strictly algorithmic Coding Challenges suitable for 1st-year implementations.
+    Target: 1st-year Engineering Students.
     
+    Topics: ${topics}
+
     Format properly as JSON array. Each object must have:
-    - title: string (Creative name)
-    - description: string (Markdown: Problem, Input/Output Examples, Constraints)
-    - points: number (Random between 30 and 100)
+    - title: string (Creative name, not standard like "Two Sum")
+    - description: string (Markdown: Problem, Input/Output Examples, Constraints. Explicitly state "Pseudocode Forbidden".)
+    - points: number (STRICTLY ${targetPoints})
     - difficulty: "MEDIUM" (Use "MEDIUM" for all)
 
-    Make sure they are not standard names like "Two Sum". Use creative scenarios.
-    Example Title: "The Lost Key in the Matrix" instead of "Search 2D Matrix".
+    Example: "The Lost Key in the Matrix" instead of "Search 2D Matrix".
     `;
 
     try {
@@ -37,8 +41,20 @@ async function generateBatch(batchNum) {
             response_format: { type: "json_object" }
         });
 
-        const result = JSON.parse(completion.choices[0].message.content);
-        return result.challenges || result.problems || [];
+        const content = completion.choices[0].message.content;
+        const result = JSON.parse(content);
+        const items = result.challenges || result.problems || [];
+
+        // Validation: Ensure title and description exist
+        const validItems = items.filter(item => item.title && item.description);
+
+        if (validItems.length < items.length) {
+            console.warn(`Warning: Dropped ${items.length - validItems.length} invalid items.`);
+        }
+
+        // Force the points to be exactly what we requested
+        return validItems.map(p => ({ ...p, points: targetPoints }));
+
     } catch (e) {
         console.error("AI Error:", e);
         return [];
@@ -46,28 +62,43 @@ async function generateBatch(batchNum) {
 }
 
 async function main() {
-    console.log("Starting AI Generation for FRESHERS (200 Problems)...");
+    console.log("Starting AI Generation for FRESHERS (Retry 300 & 750)...");
 
-    // Generate 20 batches of 10 = 200
-    for (let i = 1; i <= 20; i++) {
-        const problems = await generateBatch(i);
+    // Only retry the failed/remaining batches
+    const pointDistribution = [40, 50, 100, 150, 300, 750];
 
-        for (const p of problems) {
+    for (const points of pointDistribution) {
+        console.log(`\n--- Seeding 10 questions worth ${points} points ---`);
+
+        const problems = await generateBatch(points);
+
+        if (problems.length === 0) {
+            console.error(`Failed to generate problems for ${points} points.`);
+            continue;
+        }
+
+        const toSeed = problems.slice(0, 10);
+
+        for (const p of toSeed) {
+            if (!p.title || !p.description) {
+                console.error("Skipping invalid problem:", p);
+                continue;
+            }
             await prisma.challenge.create({
                 data: {
                     title: p.title,
                     description: p.description,
                     points: p.points,
-                    difficulty: "MEDIUM" // Default enum
+                    difficulty: "MEDIUM"
                 }
             });
         }
-        console.log(`Batch ${i}/20 seeded.`);
-        // formatting delay/safety
+        console.log(`Seeded ${toSeed.length} challenges for ${points} points.`);
+
         await new Promise(r => setTimeout(r, 1000));
     }
 
-    console.log("Fresher Generation Complete.");
+    console.log("\nFresher Generation Complete.");
 }
 
 main()
